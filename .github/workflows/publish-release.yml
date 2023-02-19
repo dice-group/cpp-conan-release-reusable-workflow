@@ -31,7 +31,7 @@ jobs:
       - name: Get minimum cmake version
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: ${ inputs.cmake-version }}
+          cmakeVersion: ${{ inputs.cmake-version }}
       - name: Install compiler
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
