@@ -13,6 +13,9 @@ on:
       CONAN_PW:
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   publish-release:
     name: Creates a release for the current version defined in CMake and uploads a Conan package to conan.dice-research.org. Fails if release for the version exists already.
@@ -69,12 +72,9 @@ jobs:
           tag: "v${{ env.asset_version }}"
 
 
-      - name: Get branch and release package name
+      - name: Get release package name
         shell: bash
         run: |
-          # we replace / with - because it is a reserved name in conan's <pkgName>/version@user/channel
-          conanized_branch_name=$(echo "${{ github.ref_name }}" | sed "s/\//-/g") 
-          echo "conan_branch_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@${{ github.repository_owner }}/${conanized_branch_name}" >> $GITHUB_ENV
           echo "conan_release_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@" >> $GITHUB_ENV
 
       - name: Copy release package from latest branch package
@@ -83,7 +83,8 @@ jobs:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
-          conan copy ${{ env.conan_branch_package_identifier }} ${{ env.conan_release_package_identifier}}
+          (conan remove -f "${{ env.conan_release_package_identifier }}" || true)
+          conan create . "${{ env.conan_release_package_identifier }}" --build missing -pr:b=default -pr:h=default
 
       - name: Select public artifactory for upload
         if: inputs.public_artifactory
