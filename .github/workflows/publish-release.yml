@@ -13,9 +13,6 @@ on:
       CONAN_PW:
         required: true
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-
 jobs:
   publish-release:
     name: Creates a release for the current version defined in CMake and uploads a Conan package to conan.dice-research.org. Fails if release for the version exists already.
