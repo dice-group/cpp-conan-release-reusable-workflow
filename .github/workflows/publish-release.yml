@@ -4,9 +4,18 @@ on:
   workflow_call:
     inputs:
       public_artifactory:
-        required: true
         type: boolean
         default: false
+      os:
+        required: true
+        type: string
+        default: ubuntu-22.04
+      compiler:
+        type: string
+        default: clang-14
+      cmake-version:
+        type: string
+        default: 3.21.7
     secrets:
       CONAN_USER:
         required: true
