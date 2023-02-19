@@ -70,7 +70,7 @@ jobs:
         shell: bash
         run: |
           # we replace / with - because it is a reserved name in conan's <pkgName>/version@user/channel
-          conanized_branch_name=$(echo "${{ github.ref_name }}" | sed "s/\//-/g") 
+          conanized_branch_name=$(echo "${{ github.ref_name }}" | sed "s/\//-/g" | head -c 51) 
           echo "conan_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@${{ github.repository_owner }}/${conanized_branch_name}" >> $GITHUB_ENV
 
       - name: Create Package
