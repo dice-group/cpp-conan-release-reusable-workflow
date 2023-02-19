@@ -76,32 +76,31 @@ jobs:
         with:
           tag: "v${{ env.asset_version }}"
 
-
-      - name: Get release package name
+      - name: Set package name identifier
         shell: bash
         run: |
-          echo "conan_release_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@" >> $GITHUB_ENV
+          echo "conan_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@" >> $GITHUB_ENV
 
-      - name: Create release package
+      - name: Create Package
         shell: bash
         env:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
-          (conan remove -f "${{ env.conan_release_package_identifier }}" || true)
-          conan create . "${{ env.conan_release_package_identifier }}" --build missing -pr:b=default -pr:h=default
+          (conan remove -f "${{ env.conan_package_identifier }}" || true)
+          conan create . "${{ env.conan_package_identifier }}" --build missing -pr:b=default -pr:h=default
 
       - name: Select public artifactory for upload
-        if: inputs.public_artifactory
+        if: ${{ fromJSON(inputs.public_artifactory) }}
         run: |
           echo "remote_artifactory_name=dice-group" >> $GITHUB_ENV
 
       - name: Select private artifactory for upload
-        if: inputs.public_artifactory
+        if: ${{ !fromJSON(inputs.public_artifactory) }}
         run: |
           echo "remote_artifactory_name=tentris-private" >> $GITHUB_ENV
 
       - name: Upload to artifactory
         shell: bash
         run: |
-          conan upload "${{ env.conan_release_package_identifier }}" -r ${{ env.remote_artifactory_name }}
+          conan upload "${{ env.conan_package_identifier }}" -r ${{ env.remote_artifactory_name }}
