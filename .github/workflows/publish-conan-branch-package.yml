@@ -87,12 +87,12 @@ jobs:
           conan create . "${{ env.conan_branch_package_identifier }}" --build missing -pr:b=default -pr:h=default
 
       - name: Select public artifactory for upload
-        if: inputs.public_artifactory
+        if: ${{ fromJSON(inputs.public_artifactory) }}
         run: |
           echo "remote_artifactory_name=dice-group" >> $GITHUB_ENV
 
       - name: Select private artifactory for upload
-        if: inputs.public_artifactory
+        if: ${{ !fromJSON(inputs.public_artifactory) }}
         run: |
           echo "remote_artifactory_name=tentris-private" >> $GITHUB_ENV
 
