@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      public_artifactory:
+        required: true
+        type: boolean
+        default: false
+    secrets:
+      CONAN_USER:
+        required: true
+      CONAN_PW:
+        required: true
+
+jobs:
+  publish-release:
+    name: Creates a release for the current version defined in CMake and uploads a Conan package to conan.dice-research.org. Fails if release for the version exists already.
+    runs-on: ${{ inputs.os }}
+    needs: publish-conan-branch-package
+    steps:
+      # setup env
+      - name: Get minimum cmake version
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ${ inputs.cmake-version }}
+      - name: Install compiler
+        id: install_cc
+        uses: rlalik/setup-cpp-compiler@v1.2
+        with:
+          compiler: ${{ inputs.compiler }}
+      - uses: rui314/setup-mold@v1
+      - name: Install conan
+        shell: bash
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: |
+          pip3 install conan
+          conan profile new --detect default
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+          conan profile update env.CXXFLAGS="${CXXFLAGS}" default
+          conan profile update env.CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}" default
+          conan profile update env.CXX="${CXX}" default
+          conan profile update env.CC="${CC}" default
+          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
+          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
+          conan user -p "${{ secrets.CONAN_PW }}" -r dice-group "${{ secrets.CONAN_USER }}"
+          conan user -p "${{ secrets.CONAN_PW }}" -r tentris-private "${{ secrets.CONAN_USER }}"
+
+      - name: Cache conan data
+        id: cache-conan
+        uses: actions/cache@v3
+        with:
+          path: ~/.conan/data
+          key: ${{ env.os }}-${{ env.compiler }}-conan
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Extract asset version
+        id: extract_asset_version
+        shell: bash
+        run: |
+          echo "asset_version=$(conan inspect . --raw version)" >> $GITHUB_ENV
+      - name: Create github release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ env.asset_version }}"
+
+
+      - name: Get branch and release package name
+        shell: bash
+        run: |
+          # we replace / with - because it is a reserved name in conan's <pkgName>/version@user/channel
+          conanized_branch_name=$(echo "${{ github.ref_name }}" | sed "s/\//-/g") 
+          echo "conan_branch_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@${{ github.repository_owner }}/${conanized_branch_name}" >> $GITHUB_ENV
+          echo "conan_release_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@" >> $GITHUB_ENV
+
+      - name: Copy release package from latest branch package
+        shell: bash
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: |
+          conan copy ${{ env.conan_branch_package_identifier }} ${{ env.conan_release_package_identifier}}
+
+      - name: Select public artifactory for upload
+        if: inputs.public_artifactory
+        run: |
+          echo "remote_artifactory_name=dice-group" >> $GITHUB_ENV
+
+      - name: Select private artifactory for upload
+        if: inputs.public_artifactory
+        run: |
+          echo "remote_artifactory_name=tentris-private" >> $GITHUB_ENV
+
+      - name: Upload to artifactory
+        shell: bash
+        run: |
+          conan upload "${{ env.conan_release_package_identifier }}" -r ${{ env.remote_artifactory_name }}
