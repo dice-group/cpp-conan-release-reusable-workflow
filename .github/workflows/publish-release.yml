@@ -16,6 +16,9 @@ on:
       cmake-version:
         type: string
         default: 3.21.7
+      conan-version:
+        type: string
+        default: 1.59
     secrets:
       CONAN_USER:
         required: true
@@ -44,7 +47,7 @@ jobs:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
-          pip3 install conan
+          pip3 install "conan==${{ inputs.conan-version }}"
           conan profile new --detect default
           conan profile update settings.compiler.libcxx=libstdc++11 default
           conan profile update env.CXXFLAGS="${CXXFLAGS}" default
