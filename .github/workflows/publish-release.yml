@@ -82,7 +82,7 @@ jobs:
         run: |
           echo "asset_version=$(conan inspect . --raw version)" >> $GITHUB_ENV
       - name: Fail if use-tag and tag is not equal to package version from conan inspect
-        if: ${{ inputs.use-tag &&  github.ref_name != format('v{0}', env.asset_version }}
+        if: ${{ inputs.use-tag &&  github.ref_name != format('v{0}', env.asset_version) }}
         run: exit 1
       
       - name: Create github release
