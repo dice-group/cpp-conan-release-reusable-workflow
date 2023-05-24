@@ -19,6 +19,9 @@ on:
       conan-version:
         type: string
         default: 1.59
+      allow-update: # if true an existing tag/release is update; otherwise the job fails
+        type: boolean
+        default: false
     secrets:
       CONAN_USER:
         required: true
@@ -78,6 +81,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ env.asset_version }}"
+          allowUpdates: ${{ inputs.allow-update }}
 
       - name: Set package name identifier
         shell: bash
