@@ -19,6 +19,9 @@ on:
       conan-version:
         type: string
         default: 1.59
+      use-tag: # if true an existing tag/release is update; otherwise the job fails. If true the job will also fail if the tag doesn't match the version reported via conan.
+        type: boolean
+        default: false
     secrets:
       CONAN_USER:
         required: true
@@ -28,8 +31,14 @@ on:
 jobs:
   publish-release:
     name: Creates a release for the current version defined in CMake and uploads a Conan package to conan.dice-research.org. Fails if release for the version exists already.
+    defaults:
+      run:
+        shell: bash
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Fail fast if use-tag is used without a tag
+        if: ${{ inputs.use-tag && github.ref_type != 'tag' }}
+        run: exit 1
       # setup env
       - name: Get minimum cmake version
         uses: lukka/get-cmake@latest
@@ -42,7 +51,6 @@ jobs:
           compiler: ${{ inputs.compiler }}
       - uses: rui314/setup-mold@v1
       - name: Install conan
-        shell: bash
         env:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
@@ -71,21 +79,23 @@ jobs:
 
       - name: Extract asset version
         id: extract_asset_version
-        shell: bash
         run: |
           echo "asset_version=$(conan inspect . --raw version)" >> $GITHUB_ENV
+      - name: Fail if use-tag and tag is not equal to package version from conan inspect
+        if: ${{ inputs.use-tag &&  github.ref_name != format('v{0}', env.asset_version) }}
+        run: exit 1
+      
       - name: Create github release
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ env.asset_version }}"
+          allowUpdates: ${{ inputs.use-tag }}
 
       - name: Set package name identifier
-        shell: bash
         run: |
           echo "conan_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@" >> $GITHUB_ENV
 
       - name: Create Package
-        shell: bash
         env:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
@@ -104,6 +114,5 @@ jobs:
           echo "remote_artifactory_name=tentris-private" >> $GITHUB_ENV
 
       - name: Upload to artifactory
-        shell: bash
         run: |
           conan upload "${{ env.conan_package_identifier }}" -r ${{ env.remote_artifactory_name }}
