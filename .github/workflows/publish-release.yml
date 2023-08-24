@@ -50,6 +50,10 @@ jobs:
           echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-16 main" | sudo tee /etc/apt/sources.list.d/llvm-16.list
           curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-16.gpg > /dev/null
 
+      - name: Ensure stdlib version
+        run: |
+          sudo apt install libstdc++-13-dev -y
+    
       - name: Get minimum cmake version
         uses: lukka/get-cmake@latest
         with:
