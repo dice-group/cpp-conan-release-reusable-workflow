@@ -12,13 +12,13 @@ on:
         default: ubuntu-22.04
       compiler:
         type: string
-        default: clang-14
+        default: clang-16
       cmake-version:
         type: string
         default: 3.21.7
       conan-version:
         type: string
-        default: 1.59
+        default: 1.60.1
       use-tag: # if true an existing tag/release is update; otherwise the job fails. If true the job will also fail if the tag doesn't match the version reported via conan.
         type: boolean
         default: false
@@ -40,6 +40,20 @@ jobs:
         if: ${{ inputs.use-tag && github.ref_type != 'tag' }}
         run: exit 1
       # setup env
+      - name: Add repos for for gcc-13 and clang-16
+        run: |
+          # gcc-13
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+
+          # clang-16
+          source /etc/os-release
+          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-16 main" | sudo tee /etc/apt/sources.list.d/llvm-16.list
+          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-16.gpg > /dev/null
+
+      - name: Ensure stdlib version
+        run: |
+          sudo apt install libstdc++-13-dev -y
+    
       - name: Get minimum cmake version
         uses: lukka/get-cmake@latest
         with:
