@@ -31,11 +31,13 @@ jobs:
     runs-on: ${{ inputs.os }}
     steps:
       # setup env
-      - name: Add repos for for gcc-13 and clang-16
+      - name: Ensure environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          
+          sudo apt-get install -y software-properties-common curl
+
+      - name: Add repos for for gcc-13 and clang-16
+        run: |          
           # gcc-13
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 
