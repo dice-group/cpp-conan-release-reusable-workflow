@@ -67,6 +67,8 @@ jobs:
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
           pip3 install "conan==${{ inputs.conan-version }}"
+          echo ~/.local/bin >> $GITHUB_PATH
+          
           conan profile new --detect default
           conan profile update settings.compiler.libcxx=libstdc++11 default
           conan profile update env.CXXFLAGS="${CXXFLAGS}" default
