@@ -19,6 +19,8 @@ on:
       conan-version:
         type: string
         default: 1.60.1
+      conan-options:
+        type: string
     secrets:
       CONAN_USER:
         required: true
@@ -97,7 +99,7 @@ jobs:
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
           (conan remove -f "${{ env.conan_package_identifier }}" || true)
-          conan create . "${{ env.conan_package_identifier }}" --build missing -pr:b=default -pr:h=default
+          conan create . "${{ env.conan_package_identifier }}" --build missing -pr:b=default -pr:h=default ${{ inputs.conan-options }}
 
       - name: Select public artifactory for upload
         if: ${{ fromJSON(inputs.public_artifactory) }}
