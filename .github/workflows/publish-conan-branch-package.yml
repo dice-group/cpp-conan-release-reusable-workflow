@@ -56,12 +56,15 @@ jobs:
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
+
       - name: Install compiler
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
         with:
           compiler: ${{ inputs.compiler }}
+
       - uses: rui314/setup-mold@v1
+
       - name: Install conan
         shell: bash
         env:
@@ -69,15 +72,12 @@ jobs:
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
           pip3 install "conan==${{ inputs.conan-version }}"
-          conan profile new --detect default
-          conan profile update settings.compiler.libcxx=libstdc++11 default
-          conan profile update env.CXXFLAGS="${CXXFLAGS}" default
-          conan profile update env.CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}" default
-          conan profile update env.CXX="${CXX}" default
-          conan profile update env.CC="${CC}" default
+          conan profile detect
+          
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
           conan login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
+          
+          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
           conan login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
 
       - name: Cache conan data
