@@ -92,6 +92,9 @@ jobs:
           echo 'compiler.cppstd={{ cppstd }}'                                                                                          >> ~/.conan2/profiles/default
           echo 'compiler.libcxx=libstdc++11'                                                                                           >> ~/.conan2/profiles/default
           
+          echo "Final profile:"
+          cat ~/.conan2/profiles/default
+          
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
           conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
           
