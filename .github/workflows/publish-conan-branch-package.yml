@@ -101,7 +101,7 @@ jobs:
           echo "conan_package_user=${{ github.repository_owner }}" >> $GITHUB_ENV
           echo "conan_package_channel=$conanized_branch_name" >> $GITHUB_ENV
           
-          echo "conan_package_identifier="${pkg_name}/${pkg_ver}@${{ github.repository_owner }}/${conanized_branch_name}" >> $GITHUB_ENV
+          echo "conan_package_identifier=${pkg_name}/${pkg_ver}@${{ github.repository_owner }}/${conanized_branch_name}" >> $GITHUB_ENV
 
       - name: Create Package
         shell: bash
