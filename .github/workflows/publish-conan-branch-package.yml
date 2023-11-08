@@ -76,6 +76,9 @@ jobs:
         run: |
           pip3 install "conan==${{ inputs.conan-version }}"
           
+          # conan profile update is deprecated (https://github.com/conan-io/conan/issues/13205)
+          # and they don't want you to use detect because it is unstable
+          
           echo '{% set compiler, version = detect_api.detect_compiler() %}'                                                             > ~/.conan2/profile/default
           echo '{% set cppstd = "${{ inputs.cppstd }}" if "${{ inputs.cppstd }}" else detect_api.default_cppstd(compiler, version) %}' >> ~/.conan2/profile/default
           echo '[settings]'                                                                                                            >> ~/.conan2/profile/default
