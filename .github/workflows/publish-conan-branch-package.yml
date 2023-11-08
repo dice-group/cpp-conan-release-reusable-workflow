@@ -13,9 +13,6 @@ on:
       compiler:
         type: string
         default: clang-16
-      compiler-stdcpp:
-        type: string
-        default:
       cmake-version:
         type: string
         default: 3.21.7
@@ -24,6 +21,9 @@ on:
         default: 2.0.13
       conan-options:
         type: string
+      conan-stdcpp:
+        type: string
+        default:
     secrets:
       CONAN_USER:
         required: true
@@ -82,7 +82,7 @@ jobs:
           conan profile detect  # Force creation of conan directory structure, will be overwritten
           
           echo '{% set compiler, version = detect_api.detect_compiler() %}'                                                             > ~/.conan2/profiles/default
-          echo '{% set cppstd = "${{ inputs.cppstd }}" if "${{ inputs.cppstd }}" else detect_api.default_cppstd(compiler, version) %}' >> ~/.conan2/profiles/default
+          echo '{% set cppstd = "${{ inputs.conan-stdcpp }}" if "${{ inputs.conan-stdcpp }}" else detect_api.default_cppstd(compiler, version) %}' >> ~/.conan2/profiles/default
           echo '[settings]'                                                                                                            >> ~/.conan2/profiles/default
           echo 'os={{ detect_api.detect_os() }}'                                                                                       >> ~/.conan2/profiles/default
           echo 'arch={{ detect_api.detect_arch() }}'                                                                                   >> ~/.conan2/profiles/default
