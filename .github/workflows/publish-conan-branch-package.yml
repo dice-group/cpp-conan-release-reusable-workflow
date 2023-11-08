@@ -13,6 +13,9 @@ on:
       compiler:
         type: string
         default: clang-16
+      compiler-stdcpp:
+        type: string
+        default:
       cmake-version:
         type: string
         default: 3.21.7
@@ -72,7 +75,17 @@ jobs:
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
           pip3 install "conan==${{ inputs.conan-version }}"
-          conan profile detect
+          
+          echo '{% set compiler, version = detect_api.detect_compiler() %}'                                                             > ~/.conan2/profile/default
+          echo '{% set cppstd = "${{ inputs.cppstd }}" if "${{ inputs.cppstd }}" else detect_api.default_cppstd(compiler, version) %}' >> ~/.conan2/profile/default
+          echo '[settings]'                                                                                                            >> ~/.conan2/profile/default
+          echo 'os={{ detect_api.detect_os() }}'                                                                                       >> ~/.conan2/profile/default
+          echo 'arch={{ detect_api.detect_arch() }}'                                                                                   >> ~/.conan2/profile/default
+          echo 'build_type=Release'                                                                                                    >> ~/.conan2/profile/default
+          echo 'compiler={{ compiler }}'                                                                                               >> ~/.conan2/profile/default
+          echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}'                                         >> ~/.conan2/profile/default
+          echo 'compiler.cppstd={{ cppstd }}'                                                                                          >> ~/.conan2/profile/default
+          echo 'compiler.libcxx=libstdc++11'                                                                                           >> ~/.conan2/profile/default
           
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
           conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
