@@ -21,9 +21,6 @@ on:
         default: 2.0.13
       conan-options:
         type: string
-      conan-stdcpp:
-        type: string
-        default:
     secrets:
       CONAN_USER:
         required: true
@@ -66,7 +63,8 @@ jobs:
         with:
           compiler: ${{ inputs.compiler }}
 
-      - uses: rui314/setup-mold@v1
+      - name: Install mold
+        uses: rui314/setup-mold@v1
 
       - name: Install conan
         shell: bash
@@ -81,19 +79,14 @@ jobs:
           
           conan profile detect  # Force creation of conan directory structure, will be overwritten
           
-          echo '{% set compiler, version = detect_api.detect_compiler() %}'                                                             > ~/.conan2/profiles/default
-          echo '{% set cppstd = "${{ inputs.conan-stdcpp }}" if "${{ inputs.conan-stdcpp }}" else detect_api.default_cppstd(compiler, version) %}' >> ~/.conan2/profiles/default
-          echo '[settings]'                                                                                                            >> ~/.conan2/profiles/default
-          echo 'os={{ detect_api.detect_os() }}'                                                                                       >> ~/.conan2/profiles/default
-          echo 'arch={{ detect_api.detect_arch() }}'                                                                                   >> ~/.conan2/profiles/default
-          echo 'build_type=Release'                                                                                                    >> ~/.conan2/profiles/default
-          echo 'compiler={{ compiler }}'                                                                                               >> ~/.conan2/profiles/default
-          echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}'                                         >> ~/.conan2/profiles/default
-          # echo 'compiler.cppstd={{ cppstd }}'                                                                                          >> ~/.conan2/profiles/default
-          echo 'compiler.libcxx=libstdc++11'                                                                                           >> ~/.conan2/profiles/default
-          
-          echo "Final profile:"
-          cat ~/.conan2/profiles/default
+          echo '{% set compiler, version = detect_api.detect_compiler() %}'                     > ~/.conan2/profiles/default
+          echo '[settings]'                                                                    >> ~/.conan2/profiles/default
+          echo 'os={{ detect_api.detect_os() }}'                                               >> ~/.conan2/profiles/default
+          echo 'arch={{ detect_api.detect_arch() }}'                                           >> ~/.conan2/profiles/default
+          echo 'build_type=Release'                                                            >> ~/.conan2/profiles/default
+          echo 'compiler={{ compiler }}'                                                       >> ~/.conan2/profiles/default
+          echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}' >> ~/.conan2/profiles/default
+          echo 'compiler.libcxx=libstdc++11'                                                   >> ~/.conan2/profiles/default
           
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
           conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
@@ -111,16 +104,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Collect package identifier information
+      - name: Collect package information
         shell: bash
         run: |
-          # we replace / with - because it is a reserved name in conan's <pkgName>/version@user/channel
-          conanized_branch_name=$(echo "${{ github.ref_name }}" | sed "s/\//-/g" | head -c 51)
           pkg_name=$(conan inspect --format json . | jq -r '.name')
           pkg_ver=$(conan inspect --format json . | jq -r '.version')
           
+          # we replace / with - because it is a reserved name in conan's <pkgName>/version@user/channel
+          conanized_branch_name=$(echo "${{ github.ref_name }}" | sed 's|/|-|g' | head -c 51)
+          
           echo "conan_package_user=${{ github.repository_owner }}" >> $GITHUB_ENV
-          echo "conan_package_channel=$conanized_branch_name" >> $GITHUB_ENV
+          echo "conan_package_channel=$conanized_branch_name"      >> $GITHUB_ENV
           
           echo "conan_package_identifier=${pkg_name}/${pkg_ver}@${{ github.repository_owner }}/${conanized_branch_name}" >> $GITHUB_ENV
 
@@ -131,7 +125,7 @@ jobs:
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
           (conan remove -f "${{ env.conan_package_identifier }}:*" || true)
-          conan create --user "${{ env.conan_package_user }}" --channel "${{ env.conan_package_channel }}" --build missing -pr:b=default -pr:h=default ${{ inputs.conan-options }} .
+          conan create --user "${{ env.conan_package_user }}" --channel "${{ env.conan_package_channel }}" --build missing ${{ inputs.conan-options }} .
 
       - name: Select public artifactory for upload
         if: ${{ fromJSON(inputs.public_artifactory) }}
