@@ -116,8 +116,8 @@ jobs:
         run: |
           # we replace / with - because it is a reserved name in conan's <pkgName>/version@user/channel
           conanized_branch_name=$(echo "${{ github.ref_name }}" | sed "s/\//-/g" | head -c 51)
-          pkg_name=$(conan inspect --format json . | jq -r '.version')
-          pkg_ver=$(conan inspect --format json . | jq -r '.name')
+          pkg_name=$(conan inspect --format json . | jq -r '.name')
+          pkg_ver=$(conan inspect --format json . | jq -r '.version')
           
           echo "conan_package_user=${{ github.repository_owner }}" >> $GITHUB_ENV
           echo "conan_package_channel=$conanized_branch_name" >> $GITHUB_ENV
