@@ -41,11 +41,17 @@ jobs:
       - name: Fail fast if use-tag is used without a tag
         if: ${{ inputs.use-tag && github.ref_type != 'tag' }}
         run: exit 1
+
       # setup env
+      - name: Install tools and requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq python3 python3-pip
+
       - name: Add repos for for gcc-13 and clang-16
         run: |
           # gcc-13
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
           # clang-16
           source /etc/os-release
@@ -54,70 +60,85 @@ jobs:
 
       - name: Ensure stdlib version
         run: |
-          sudo apt install libstdc++-13-dev -y
+          sudo apt-get install -y libstdc++-13-dev
     
       - name: Get minimum cmake version
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
+
       - name: Install compiler
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
         with:
           compiler: ${{ inputs.compiler }}
-      - uses: rui314/setup-mold@v1
+
+      - name: Install mold
+        uses: rui314/setup-mold@v1
+
       - name: Install conan
         env:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
           pip3 install "conan==${{ inputs.conan-version }}"
-          conan profile new --detect default
-          conan profile update settings.compiler.libcxx=libstdc++11 default
-          conan profile update env.CXXFLAGS="${CXXFLAGS}" default
-          conan profile update env.CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}" default
-          conan profile update env.CXX="${CXX}" default
-          conan profile update env.CC="${CC}" default
+          
+          # conan profile update is deprecated (https://github.com/conan-io/conan/issues/13205)
+          # and they don't want you to use detect because it is unstable
+          
+          conan profile detect  # Force creation of conan directory structure, will be overwritten
+          
+          echo '{% set compiler, version = detect_api.detect_compiler() %}'                     > ~/.conan2/profiles/default
+          echo '[settings]'                                                                    >> ~/.conan2/profiles/default
+          echo 'os={{ detect_api.detect_os() }}'                                               >> ~/.conan2/profiles/default
+          echo 'arch={{ detect_api.detect_arch() }}'                                           >> ~/.conan2/profiles/default
+          echo 'build_type=Release'                                                            >> ~/.conan2/profiles/default
+          echo 'compiler={{ compiler }}'                                                       >> ~/.conan2/profiles/default
+          echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}' >> ~/.conan2/profiles/default
+          echo 'compiler.libcxx=libstdc++11'                                                   >> ~/.conan2/profiles/default
+          
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
+          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
+          
           conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
-          conan user -p "${{ secrets.CONAN_PW }}" -r dice-group "${{ secrets.CONAN_USER }}"
-          conan user -p "${{ secrets.CONAN_PW }}" -r tentris-private "${{ secrets.CONAN_USER }}"
+          conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
 
       - name: Cache conan data
         id: cache-conan
         uses: actions/cache@v3
         with:
-          path: ~/.conan/data
-          key: ${{ env.os }}-${{ env.compiler }}-conan
+          path: ~/.conan2/p
+          key: ${{ inputs.os }}-${{ inputs.compiler }}-conan-reusable-workflow-release
 
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Extract asset version
-        id: extract_asset_version
+      - name: Collect package information
+        shell: bash
         run: |
-          echo "asset_version=$(conan inspect . --raw version)" >> $GITHUB_ENV
+          pkg_name=$(conan inspect --format json . | jq -r '.name')
+          pkg_ver=$(conan inspect --format json . | jq -r '.version')
+
+          echo "conan_package_version=${pkg_ver}"                >> $GITHUB_ENV
+          echo "conan_package_identifier=${pkg_name}/${pkg_ver}" >> $GITHUB_ENV
+
       - name: Fail if use-tag and tag is not equal to package version from conan inspect
-        if: ${{ inputs.use-tag &&  github.ref_name != format('v{0}', env.asset_version) }}
+        if: ${{ inputs.use-tag &&  github.ref_name != format('v{0}', env.conan_package_version) }}
         run: exit 1
       
       - name: Create github release
         uses: ncipollo/release-action@v1
         with:
-          tag: "v${{ env.asset_version }}"
+          tag: v${{ env.conan_package_version }}
           allowUpdates: ${{ inputs.use-tag }}
-
-      - name: Set package name identifier
-        run: |
-          echo "conan_package_identifier=$(conan inspect . --raw name)/$(conan inspect . --raw version)@" >> $GITHUB_ENV
 
       - name: Create Package
         env:
           CC: ${{ steps.install_cc.outputs.cc }}
           CXX: ${{ steps.install_cc.outputs.cxx }}
         run: |
-          (conan remove -f "${{ env.conan_package_identifier }}" || true)
-          conan create . "${{ env.conan_package_identifier }}" --build missing -pr:b=default -pr:h=default ${{ inputs.conan-options }}
+          (conan remove -f "${{ env.conan_package_identifier }}:*" || true)
+          conan create --build missing ${{ inputs.conan-options }} .
 
       - name: Select public artifactory for upload
         if: ${{ fromJSON(inputs.public_artifactory) }}
@@ -131,4 +152,4 @@ jobs:
 
       - name: Upload to artifactory
         run: |
-          conan upload "${{ env.conan_package_identifier }}" -r ${{ env.remote_artifactory_name }}
+          conan upload "${{ env.conan_package_identifier }}" -r ${{ env.remote_artifactory_name }} --only-recipe
