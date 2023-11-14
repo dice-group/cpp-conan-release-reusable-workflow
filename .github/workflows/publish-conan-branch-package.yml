@@ -140,4 +140,4 @@ jobs:
       - name: Upload to artifactory
         shell: bash
         run: |
-          conan upload "${{ env.conan_package_identifier }}" --force -r ${{ env.remote_artifactory_name }}
+          conan upload "${{ env.conan_package_identifier }}" --force -r ${{ env.remote_artifactory_name }} --only-recipe

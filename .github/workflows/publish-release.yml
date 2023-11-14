@@ -152,4 +152,4 @@ jobs:
 
       - name: Upload to artifactory
         run: |
-          conan upload "${{ env.conan_package_identifier }}" -r ${{ env.remote_artifactory_name }}
+          conan upload "${{ env.conan_package_identifier }}" -r ${{ env.remote_artifactory_name }} --only-recipe
