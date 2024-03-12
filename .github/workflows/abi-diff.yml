@@ -119,14 +119,14 @@ jobs:
       - name: Fetch current ABI version
         id: current-abi-version
         run: |
-          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-current
+          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
           echo "abi_version=$(/tmp/detect-abi-version-current)" >> "$GITHUB_OUTPUT"
 
       - name: Fetch base branch ABI version
         id: base-abi-version
         run: |
           git checkout ${{ inputs.base-branch }}
-          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-base
+          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
           echo "abi_version=$(/tmp/detect-abi-version-base)" >> "$GITHUB_OUTPUT"
 
       - name: Check for ABI differences
@@ -155,4 +155,3 @@ jobs:
               echo "Files changed but ABI version was not changed"
             fi
           fi
-
