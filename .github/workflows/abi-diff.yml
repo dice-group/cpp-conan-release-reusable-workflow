@@ -133,11 +133,12 @@ jobs:
           abi_version=$(/tmp/detect-abi-version-base)
           
           echo "Base ABI version: $abi_version"
-          echo "abi_version=$abi-version" >> "$GITHUB_OUTPUT"
+          echo "abi_version=$abi_version" >> "$GITHUB_OUTPUT"
 
       - name: Check for ABI differences
         run: |
-          [[ $(wc -l /tmp/diff.txt) -eq 0 ]]
+          lines_in_diff=$(wc -l /tmp/diff.txt)
+          [[ $lines_in_diff -eq 0 ]]
           files_eq=$?
           echo "Files equal: $files_eq"
           
