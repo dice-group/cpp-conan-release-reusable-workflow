@@ -92,8 +92,12 @@ jobs:
           fetch-depth: 0 # needed to checkout all branches for this Action to work
 
       - name: Run diff
+        id: diff
         run: |
           git diff remotes/origin/${{ inputs.base-branch }} -- ${{ inputs.search-path }} > /tmp/diff.txt
+          diff_lines=$(cat /tmp/diff.txt | wc -l)
+          echo "Diff has $diff_lines lines"
+          echo "nlines=$diff_lines" >> "$GITHUB_OUTPUT"
 
       - name: Configure CMake
         env:
@@ -137,8 +141,7 @@ jobs:
 
       - name: Check for ABI differences
         run: |
-          lines_in_diff=$(cat /tmp/diff.txt | wc -l)
-          [[ $lines_in_diff -eq 0 ]]
+          [[ ${{ steps.diff.outputs.nlines }} -eq 0 ]]
           files_eq=$?
           echo "Files equal: $files_eq"
           
