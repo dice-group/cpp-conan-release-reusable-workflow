@@ -152,7 +152,7 @@ jobs:
             if [[ $versions_eq -ne 0 ]]; then
               # versions not equal
           
-              echo "Files did not change but ABI version was changed"
+              echo "Files did not change but ABI version was changed" >&2
               exit 1
             fi
           else
@@ -161,6 +161,7 @@ jobs:
             if [[ $versions_eq -eq 0 ]]; then
               # versions equal
           
-              echo "Files changed but ABI version was not changed"
+              echo "Files changed but ABI version was not changed" >&2
+              exit 2
             fi
           fi
