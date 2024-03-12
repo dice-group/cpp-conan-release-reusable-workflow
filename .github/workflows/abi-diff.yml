@@ -139,32 +139,14 @@ jobs:
           echo "Base ABI version: $abi_version"
           echo "abi_version=$abi_version" >> "$GITHUB_OUTPUT"
 
-      - name: Check for ABI differences
+      - name: Check missing ABI version bump
+        if: ${{ steps.diff.outputs.nlines != 0 && steps.current-abi-version.outputs.abi_version == steps.base-abi-version.outputs.abi_version }}
         run: |
-          [[ ${{ steps.diff.outputs.nlines }} -eq 0 ]]
-          files_eq=$?
-          echo "Files equal: $files_eq"
-          
-          [[ ${{ steps.current-abi-version.outputs.abi_version }} == ${{ steps.base-abi-version.outputs.abi_version }} ]]
-          versions_eq=$?
-          echo "ABI versions equal: $versions_eq"
-          
-          if [[ $files_eq -eq 0 ]]; then
-            # files equal
-          
-            if [[ $versions_eq -ne 0 ]]; then
-              # versions not equal
-          
-              echo "::error::Files did not change but ABI version was changed"
-              exit 1
-            fi
-          else
-            # files not equal
-          
-            if [[ $versions_eq -eq 0 ]]; then
-              # versions equal
-          
-              echo "::error::Files changed but ABI version was not changed"
-              exit 1
-            fi
-          fi
+          echo "::error::Files changed but ABI version was not changed"
+          exit 1
+
+      - name: Check erroneous ABI version bump
+        if: ${{ steps.diff.outputs.nlines == 0 && steps.current-abi-version.outputs.abi_version != steps.base-abi-version.outputs.abi_version }}
+        run: |
+          echo "::error::Files did not change but ABI version was changed"
+          exit 1
