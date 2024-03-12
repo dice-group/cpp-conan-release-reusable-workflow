@@ -93,7 +93,7 @@ jobs:
 
       - name: Run diff
         run: |
-          git diff ${{ inputs.base-branch }} -- ${{ inputs.search-path }} > /tmp/diff.txt
+          git diff remotes/origin/${{ inputs.base-branch }} -- ${{ inputs.search-path }} > /tmp/diff.txt
 
       - name: Configure CMake
         env:
