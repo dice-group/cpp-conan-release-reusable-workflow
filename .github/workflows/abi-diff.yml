@@ -137,7 +137,7 @@ jobs:
 
       - name: Check for ABI differences
         run: |
-          lines_in_diff=$(wc -l /tmp/diff.txt)
+          lines_in_diff=$(cat /tmp/diff.txt | wc -l)
           [[ $lines_in_diff -eq 0 ]]
           files_eq=$?
           echo "Files equal: $files_eq"
