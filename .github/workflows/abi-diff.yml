@@ -1,0 +1,141 @@
+name: Detect ABI Diff
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+        default: ubuntu-22.04
+      compiler:
+        type: string
+        default: clang-17
+      cmake-version:
+        type: string
+        default: 3.21.7
+      conan-version:
+        type: string
+        default: 1.62.0
+
+      base-branch:
+        type: string
+        default: develop
+      search-path:
+        type: string
+        default: .
+
+      abi-version-header:
+        type: string
+        required: true
+      abi-version-const:
+        type: string
+        required: true
+
+jobs:
+  detect-abi-diff:
+    name: Detects potential ABI differences
+    defaults:
+      run:
+        shell: bash
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Add Repos for for gcc-13 and clang-17
+        run: |
+          # gcc-13
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          
+          source /etc/os-release
+          
+          # clang-16
+          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-16 main" | sudo tee /etc/apt/sources.list.d/llvm-16.list
+          
+          # clang-17
+          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-17 main" | sudo tee /etc/apt/sources.list.d/llvm-17.list
+          
+          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm.gpg > /dev/null
+
+      - name: Ensure stdlib version
+        run: |
+          sudo apt install libstdc++-13-dev -y
+
+      - name: Get minimum cmake version
+        uses: lukka/get-cmake@v3.24.3
+        with:
+          cmakeVersion: ${{ inputs.cmake-version }}
+
+      - name: Install compiler
+        id: install_cc
+        uses: rlalik/setup-cpp-compiler@v1.2
+        with:
+          compiler: ${{ inputs.compiler }}
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # needed to checkout all branches for this Action to work
+
+      - uses: GrantBirki/git-diff-action@v2.4.1
+        id: git-diff
+        with:
+          base_branch: ${{ inputs.base-branch }}
+          search_path: ${{ inputs.search-path }}
+          file_output_only: true
+          raw_diff_file_output: /tmp/diff.txt
+
+      - name: Configure CMake
+        env:
+          CC: ${{ steps.install_cc.outputs.cc }}
+          CXX: ${{ steps.install_cc.outputs.cxx }}
+        run: |
+          cmake -G Ninja -B build_dir
+
+      - name: Create ABI version detection program
+        run: |
+          PROG=$(cat << EOF
+          #include <iostream>
+          #include <${{ inputs.abi-version-header }}>
+          
+          int main() {
+            std::cout << ${{ inputs.abi-version-const }} << std::endl;
+          }
+          EOF
+          )
+          
+          echo "$PROG" > /tmp/detect-abi-version.cpp
+
+      - name: Fetch current ABI version
+        id: current-abi-version
+        run: |
+          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-current
+          echo "abi_version=$(/tmp/detect-abi-version-current)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch base branch ABI version
+        id: base-abi-version
+        run: |
+          git checkout ${{ inputs.base-branch }}
+          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-base
+          echo "abi_version=$(/tmp/detect-abi-version-base)" >> "$GITHUB_OUTPUT"
+
+      - name: Check for ABI differences
+        run: |
+          [[ $(wc -l /tmp/diff.txt) -eq 0 ]]
+          files_eq=$?
+          
+          [[ ${{ steps.current-abi-vesion.outputs.abi_version }} == ${{ steps.base-abi-version.outputs.abi_version }} ]]
+          versions_eq=$?
+          
+          if [[ $files_eq -eq 0 ]]; then
+            # files equal
+          
+            if [[ $versions_eq -ne 0 ]]; then
+              # versions not equal
+          
+              echo "Files did not change but ABI version was changed"
+              exit 1
+            fi
+          else
+            # files not equal
+          
+            if [[ $versions_eq -eq 0 ]]; then
+              # versions equal
+          
+              echo "Files changed but ABI version was not changed"
+            fi
+          fi
