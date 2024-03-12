@@ -120,22 +120,30 @@ jobs:
         id: current-abi-version
         run: |
           ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
-          echo "abi_version=$(/tmp/detect-abi-version-current)" >> "$GITHUB_OUTPUT"
+          abi_version=$(/tmp/detect-abi-version-current)
+          
+          echo "Current ABI version: $abi_version"
+          echo "abi_version=$abi_version" >> "$GITHUB_OUTPUT"
 
       - name: Fetch base branch ABI version
         id: base-abi-version
         run: |
-          git checkout ${{ inputs.base-branch }}
+          git switch ${{ inputs.base-branch }}
           ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
-          echo "abi_version=$(/tmp/detect-abi-version-base)" >> "$GITHUB_OUTPUT"
+          abi_version=$(/tmp/detect-abi-version-base)
+          
+          echo "Base ABI version: $abi_version"
+          echo "abi_version=$abi-version" >> "$GITHUB_OUTPUT"
 
       - name: Check for ABI differences
         run: |
           [[ $(wc -l /tmp/diff.txt) -eq 0 ]]
           files_eq=$?
+          echo "Files equal: $files_eq"
           
-          [[ ${{ steps.current-abi-vesion.outputs.abi_version }} == ${{ steps.base-abi-version.outputs.abi_version }} ]]
+          [[ ${{ steps.current-abi-version.outputs.abi_version }} == ${{ steps.base-abi-version.outputs.abi_version }} ]]
           versions_eq=$?
+          echo "ABI versions equal: $versions_eq"
           
           if [[ $files_eq -eq 0 ]]; then
             # files equal
