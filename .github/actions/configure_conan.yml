@@ -3,8 +3,6 @@ inputs:
   conan-version:
     type: string
     default: 2.3.1
-  conan-options:
-    type: string
 runs:
   using: "composite"
   steps:
