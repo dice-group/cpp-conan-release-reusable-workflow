@@ -1,8 +1,14 @@
 name: 'Configure Conan'
+description: "installs conan via pip and creates a default user for it"
 inputs:
   conan-version:
-    type: string
+    description: "conan version to install"
     default: 2.3.1
+    required: true
+  conan_provider:
+    description: "download conan_provider.cmake"
+    default: "false"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -27,3 +33,11 @@ runs:
           echo 'compiler={{ compiler }}'                                                       >> ~/.conan2/profiles/default
           echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}' >> ~/.conan2/profiles/default
           echo 'compiler.libcxx=libstdc++11'                                                   >> ~/.conan2/profiles/default
+
+      - name: Get dependency provider
+        shell: bash
+        if: ${{ inputs.conan_provider == 'true' }}
+        run: |
+          sudo apt-get install -y wget
+          
+          wget https://github.com/conan-io/cmake-conan/raw/develop2/conan_provider.cmake -O conan_provider.cmake
