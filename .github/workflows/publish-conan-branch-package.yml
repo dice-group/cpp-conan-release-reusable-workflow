@@ -15,10 +15,10 @@ on:
         default: clang-17
       cmake-version:
         type: string
-        default: 3.21.7
+        default: 3.24.0
       conan-version:
         type: string
-        default: 2.0.13
+        default: 2.3.0
       conan-options:
         type: string
     secrets:
@@ -39,19 +39,7 @@ jobs:
           sudo apt-get install -y jq python3 python3-pip
 
       - name: Add repos for for gcc-13 and clang-16,17
-        run: |
-          # gcc-13
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-
-          # clang-16
-          source /etc/os-release
-          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-16 main" | sudo tee /etc/apt/sources.list.d/llvm-16.list
-          
-          # clang-17
-          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-17 main" | sudo tee /etc/apt/sources.list.d/llvm-17.list
-          
-          # llvm key
-          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm.gpg > /dev/null
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt
 
       - name: Ensure stdlib version
         run: |
@@ -72,27 +60,12 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install conan
-        shell: bash
-        env:
-          CC: ${{ steps.install_cc.outputs.cc }}
-          CXX: ${{ steps.install_cc.outputs.cxx }}
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan
+        with:
+          conan-version: ${{ inputs.conan-version }}
+
+      - name: add conan user
         run: |
-          pip3 install "conan==${{ inputs.conan-version }}"
-          
-          # conan profile update is deprecated (https://github.com/conan-io/conan/issues/13205)
-          # and they don't want you to use detect because it is unstable
-          
-          conan profile detect  # Force creation of conan directory structure, will be overwritten
-          
-          echo '{% set compiler, version = detect_api.detect_compiler() %}'                     > ~/.conan2/profiles/default
-          echo '[settings]'                                                                    >> ~/.conan2/profiles/default
-          echo 'os={{ detect_api.detect_os() }}'                                               >> ~/.conan2/profiles/default
-          echo 'arch={{ detect_api.detect_arch() }}'                                           >> ~/.conan2/profiles/default
-          echo 'build_type=Release'                                                            >> ~/.conan2/profiles/default
-          echo 'compiler={{ compiler }}'                                                       >> ~/.conan2/profiles/default
-          echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}' >> ~/.conan2/profiles/default
-          echo 'compiler.libcxx=libstdc++11'                                                   >> ~/.conan2/profiles/default
-          
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
           conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
           
