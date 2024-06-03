@@ -1,0 +1,11 @@
+name: 'get conan dependency provider'
+description: "installs conan_provider.cmake"
+runs:
+  using: "composite"
+  steps:
+      - name: Get dependency provider
+        shell: bash
+        run: |
+          sudo apt-get install -y wget
+          
+          wget https://github.com/conan-io/cmake-conan/raw/develop2/conan_provider.cmake -O conan_provider.cmake

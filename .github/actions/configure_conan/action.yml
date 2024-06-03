@@ -1,0 +1,31 @@
+name: 'Configure Conan'
+description: "installs conan via pip and creates a default user for it"
+inputs:
+  conan-version:
+    description: "conan version to install"
+    default: 2.3.1
+    required: true
+runs:
+  using: "composite"
+  steps:
+      - name: Install conan
+        shell: bash
+        run: |
+          pip3 install "conan==${{ inputs.conan-version }}"
+
+      - name: configure conan
+        shell: bash
+        run: |
+          # conan profile update is deprecated (https://github.com/conan-io/conan/issues/13205)
+          # and they don't want you to use detect because it is unstable
+          
+          conan profile detect  # Force creation of conan directory structure, will be overwritten
+          
+          echo '{% set compiler, version = detect_api.detect_compiler() %}'                     > ~/.conan2/profiles/default
+          echo '[settings]'                                                                    >> ~/.conan2/profiles/default
+          echo 'os={{ detect_api.detect_os() }}'                                               >> ~/.conan2/profiles/default
+          echo 'arch={{ detect_api.detect_arch() }}'                                           >> ~/.conan2/profiles/default
+          echo 'build_type=Release'                                                            >> ~/.conan2/profiles/default
+          echo 'compiler={{ compiler }}'                                                       >> ~/.conan2/profiles/default
+          echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}' >> ~/.conan2/profiles/default
+          echo 'compiler.libcxx=libstdc++11'                                                   >> ~/.conan2/profiles/default
