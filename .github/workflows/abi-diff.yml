@@ -83,7 +83,7 @@ jobs:
           path: ~/.conan2/p
           key: conan2-${{ inputs.os }}-${{ inputs.compiler }}-abi-diff
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # needed to check out all branches for this Action to work
 
