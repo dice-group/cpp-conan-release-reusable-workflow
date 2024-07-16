@@ -90,8 +90,7 @@ jobs:
       - name: Run diff
         id: diff
         run: |
-          git diff remotes/origin/${{ inputs.base-branch }} -- ${{ inputs.search-path }} > /tmp/diff.txt
-          diff_lines=$(cat /tmp/diff.txt | wc -l)
+          diff_lines=$(git diff remotes/origin/${{ inputs.base-branch }} -- ${{ inputs.search-path }} | wc -l)
           echo "Diff has $diff_lines lines"
           echo "nlines=$diff_lines" >> "$GITHUB_OUTPUT"
 
