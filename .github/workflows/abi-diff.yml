@@ -83,15 +83,19 @@ jobs:
           path: ~/.conan2/p
           key: conan2-${{ inputs.os }}-${{ inputs.compiler }}-abi-diff
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # needed to check out all branches for this Action to work
 
       - name: Run diff
         id: diff
         run: |
-          git diff remotes/origin/${{ inputs.base-branch }} -- ${{ inputs.search-path }} > /tmp/diff.txt
-          diff_lines=$(cat /tmp/diff.txt | wc -l)
+          # this is a workaround, if I put the github expansions directly into
+          # the line below these two it doesn't work
+          base_branch="${{ inputs.base-branch }}"
+          search_path="${{ inputs.search-path }}"
+          
+          diff_lines=$(git diff "remotes/origin/$base_branch" -- $search_path | wc -l)
           echo "Diff has $diff_lines lines"
           echo "nlines=$diff_lines" >> "$GITHUB_OUTPUT"
 
