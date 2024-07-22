@@ -74,7 +74,11 @@ jobs:
 
       - name: Add conan remotes
         run: |
-          conan remote add -f dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
+          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
+          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
+          
+          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
+          conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
 
       - name: Cache conan data
         id: cache-conan
