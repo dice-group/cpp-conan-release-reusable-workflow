@@ -129,6 +129,10 @@ jobs:
       # TODO point to main
       - name: Generate version file on feature branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@fix/abi-diff-private-conan
+        with:
+          cc: ${{ steps.install_cc.outputs.cc }}
+          cxx: ${{ steps.install_cc.outputs.cxx }}
+          target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch current ABI version
         id: current-abi-version
@@ -147,6 +151,10 @@ jobs:
       # TODO point to main
       - name: Regenerate version file for base branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@fix/abi-diff-private-conan
+        with:
+          cc: ${{ steps.install_cc.outputs.cc }}
+          cxx: ${{ steps.install_cc.outputs.cxx }}
+          target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch base branch ABI version
         id: base-abi-version
