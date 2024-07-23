@@ -26,8 +26,9 @@ runs:
     - name: Generate Version file
       if: "${{ inputs.target != '' }}"
       shell: bash
+      working-directory: build_dir
       env:
         CC: ${{ inputs.cc }}
         CXX: ${{ inputs.cxx }}
       run: |
-        cmake --build build_dir --target ${{ inputs.target }}
+        cmake --build . --target ${{ inputs.target }}

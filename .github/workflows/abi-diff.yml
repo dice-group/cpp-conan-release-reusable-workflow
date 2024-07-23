@@ -137,7 +137,7 @@ jobs:
       - name: Fetch current ABI version
         id: current-abi-version
         run: |
-          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
+          ${{ steps.install_cc.outputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-current)
           
           echo "Current ABI version: $abi_version"
@@ -159,7 +159,7 @@ jobs:
       - name: Fetch base branch ABI version
         id: base-abi-version
         run: |
-          ${{ steps.install_cc.outputs.cxx }} -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
+          ${{ steps.install_cc.outputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-base)
           
           echo "Base ABI version: $abi_version"
