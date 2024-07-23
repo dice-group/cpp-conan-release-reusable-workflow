@@ -7,6 +7,9 @@ inputs:
   cxx:
     description: "C++ compiler"
     required: true
+  build-dir:
+    description: "Location to place cmake build files"
+    required: true
   target:
     description: "Optionally, the cmake target needed to be built to generate the version file"
     required: false
@@ -20,13 +23,13 @@ runs:
         CC: ${{ inputs.cc }}
         CXX: ${{ inputs.cxx }}
       run: |
-        cmake -G Ninja -B build_dir -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=conan_provider.cmake
+        cmake -G Ninja -B ${{ inputs.build-dir }} -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=conan_provider.cmake
 
     # Build the target that generates the version file if necessary
     - name: Generate Version file
       if: "${{ inputs.target != '' }}"
       shell: bash
-      working-directory: build_dir
+      working-directory: ${{ inputs.build-dir }}
       env:
         CC: ${{ inputs.cc }}
         CXX: ${{ inputs.cxx }}

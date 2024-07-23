@@ -132,6 +132,7 @@ jobs:
         with:
           cc: ${{ steps.install_cc.outputs.cc }}
           cxx: ${{ steps.install_cc.outputs.cxx }}
+          build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch current ABI version
@@ -154,6 +155,7 @@ jobs:
         with:
           cc: ${{ steps.install_cc.outputs.cc }}
           cxx: ${{ steps.install_cc.outputs.cxx }}
+          build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch base branch ABI version
