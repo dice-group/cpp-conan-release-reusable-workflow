@@ -126,9 +126,8 @@ jobs:
           echo "Diff has $diff_lines lines"
           echo "nlines=$diff_lines" >> "$GITHUB_OUTPUT"
 
-      # TODO point to main
       - name: Generate version file on feature branch
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@fix/abi-diff-private-conan
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
           cc: ${{ steps.install_cc.outputs.cc }}
           cxx: ${{ steps.install_cc.outputs.cxx }}
@@ -149,9 +148,8 @@ jobs:
           rm -rf build_dir
           git switch ${{ inputs.base-branch }}
 
-      # TODO point to main
       - name: Regenerate version file for base branch
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@fix/abi-diff-private-conan
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
           cc: ${{ steps.install_cc.outputs.cc }}
           cxx: ${{ steps.install_cc.outputs.cxx }}
