@@ -19,7 +19,7 @@ runs:
           # conan profile update is deprecated (https://github.com/conan-io/conan/issues/13205)
           # and they don't want you to use detect because it is unstable
           
-          conan profile detect > /dev/null  # Force creation of conan directory structure, will be overwritten
+          conan profile detect > /dev/null 2>&1  # Force creation of conan directory structure, will be overwritten
           
           echo '{% set compiler, version, c_exe = detect_api.detect_default_compiler() %}'      > ~/.conan2/profiles/default
           echo '[settings]'                                                                    >> ~/.conan2/profiles/default
