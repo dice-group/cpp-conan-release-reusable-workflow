@@ -32,4 +32,4 @@ runs:
           echo 'compiler.cppstd={{ detect_api.default_cppstd(compiler, version) }}'            >> ~/.conan2/profiles/default
           
           echo "Created conan profile:"
-          conan profile show
+          cat ~/.conan2/profiles/default
