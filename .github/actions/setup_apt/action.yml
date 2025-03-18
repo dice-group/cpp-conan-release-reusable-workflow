@@ -6,21 +6,23 @@ runs:
     - name: Add repos
       shell: bash
       run: |
-       # gcc-13
-       sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-
-       source /etc/os-release
-
-       # clang-17
-       echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-17 main" | sudo tee /etc/apt/sources.list.d/llvm-17.list
-       curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-17.gpg > /dev/null
-
-       # clang-18
-       echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-18 main" | sudo tee /etc/apt/sources.list.d/llvm-18.list
-       curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-18.gpg > /dev/null
-
-       # clang-19
-       echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-19 main" | sudo tee /etc/apt/sources.list.d/llvm-19.list
-       curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-19.gpg > /dev/null
-
-       sudo apt-get update -y
+        source /etc/os-release
+       
+        if [[ "$UBUNUT_CODENAME" == "jammy" ]]; then
+          # gcc-13
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          
+          # clang-17
+          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-17 main" | sudo tee /etc/apt/sources.list.d/llvm-17.list
+          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-17.gpg > /dev/null
+          
+          # clang-18
+          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-18 main" | sudo tee /etc/apt/sources.list.d/llvm-18.list
+          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-18.gpg > /dev/null
+        fi
+        
+        # clang-19
+        echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-19 main" | sudo tee /etc/apt/sources.list.d/llvm-19.list
+        curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-19.gpg > /dev/null
+  
+        sudo apt-get update -y
