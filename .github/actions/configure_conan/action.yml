@@ -11,7 +11,14 @@ runs:
       - name: Install conan
         shell: bash
         run: |
-          pip3 install "conan==${{ inputs.conan-version }}"
+          source /etc/os-release
+          
+          if [[ "$UBUNTU_CODENAME" == "jammy" ]]; then
+            pip3 install "conan==${{ inputs.conan-version }}"
+          elif
+            sudo apt-get install -y pipx
+            pipx install "conan==${{ inputs.conan-version }}"
+          fi
 
       - name: configure conan
         shell: bash
