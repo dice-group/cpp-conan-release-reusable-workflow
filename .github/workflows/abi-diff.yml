@@ -57,10 +57,6 @@ jobs:
       - name: Add repos for for gcc-13 and clang-16,17
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
 
-      - name: Ensure stdlib version
-        run: |
-          sudo apt install libstdc++-13-dev -y
-
       - name: Get minimum cmake version
         uses: lukka/get-cmake@v3.29.6
         with:
