@@ -15,7 +15,7 @@ runs:
           
           if [[ "$UBUNTU_CODENAME" == "jammy" ]]; then
             pip3 install "conan==${{ inputs.conan-version }}"
-          elif
+          else
             sudo apt-get install -y pipx
             pipx install "conan==${{ inputs.conan-version }}"
           fi
