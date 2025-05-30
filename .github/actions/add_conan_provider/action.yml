@@ -6,6 +6,4 @@ runs:
       - name: Get dependency provider
         shell: bash
         run: |
-          sudo apt-get install -y wget
-          
-          wget https://github.com/conan-io/cmake-conan/raw/develop2/conan_provider.cmake -O conan_provider.cmake
+          curl -L https://github.com/conan-io/cmake-conan/raw/develop2/conan_provider.cmake -o conan_provider.cmake
