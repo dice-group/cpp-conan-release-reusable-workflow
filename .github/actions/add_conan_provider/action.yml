@@ -1,9 +1,14 @@
 name: 'get conan dependency provider'
 description: "installs conan_provider.cmake"
+inputs:
+  commit-hash:
+    description: "commit hash of the commit to pull the conan_provider.cmake file from"
+    default: "b0e4d1ec08edb35ef31033938567d621f6643c17"
+    required: false
 runs:
   using: "composite"
   steps:
       - name: Get dependency provider
         shell: bash
         run: |
-          curl -L https://github.com/conan-io/cmake-conan/raw/develop2/conan_provider.cmake -o conan_provider.cmake
+          curl -L https://raw.githubusercontent.com/conan-io/cmake-conan/${{ inputs.commit-hash }}/conan_provider.cmake -o conan_provider.cmake
