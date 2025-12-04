@@ -5,15 +5,12 @@ on:
       os:
         type: string
         default: ubuntu-22.04
-      compiler:
+      cc:
         type: string
-        default: clang-17
-      cmake-version:
+        default: clang-20
+      cxx:
         type: string
-        default: 3.21.7
-      conan-version:
-        type: string
-        default: 1.62.0
+        default: clang++-20
 
       # Branch to compare to
       base-branch:
@@ -54,31 +51,8 @@ jobs:
         shell: bash
     runs-on: ${{ inputs.os }}
     steps:
-      - name: Add repos for for gcc-13 and clang-16,17
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
-
-      - name: Get minimum cmake version
-        uses: lukka/get-cmake@v3.29.6
-        with:
-          cmakeVersion: ${{ inputs.cmake-version }}
-
-      - name: Install compiler
-        id: install_cc
-        uses: rlalik/setup-cpp-compiler@v1.2
-        with:
-          compiler: ${{ inputs.compiler }}
-
-      - name: Install conan
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
-        with:
-          conan-version: ${{ inputs.conan-version }}
-
-      - name: Add conan remotes
+      - name: Conan login
         run: |
-          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
-          
-          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
           conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
 
       - name: Cache conan data
@@ -125,15 +99,15 @@ jobs:
       - name: Generate version file on feature branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
-          cc: ${{ steps.install_cc.outputs.cc }}
-          cxx: ${{ steps.install_cc.outputs.cxx }}
+          cc: ${{ inputs.cc }}
+          cxx: ${{ inputs.cxx }}
           build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch current ABI version
         id: current-abi-version
         run: |
-          ${{ steps.install_cc.outputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
+          ${{ inputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-current)
           
           echo "Current ABI version: $abi_version"
@@ -147,15 +121,15 @@ jobs:
       - name: Regenerate version file for base branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
-          cc: ${{ steps.install_cc.outputs.cc }}
-          cxx: ${{ steps.install_cc.outputs.cxx }}
+          cc: ${{ inputs.cc }}
+          cxx: ${{ inputs.cxx }}
           build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch base branch ABI version
         id: base-abi-version
         run: |
-          ${{ steps.install_cc.outputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
+          ${{ inputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-base)
           
           echo "Base ABI version: $abi_version"
