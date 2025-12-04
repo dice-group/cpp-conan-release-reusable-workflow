@@ -107,7 +107,7 @@ jobs:
       - name: Fetch current ABI version
         id: current-abi-version
         run: |
-          ${{ steps.install_cc.outputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
+          ${{ inputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-current)
           
           echo "Current ABI version: $abi_version"
