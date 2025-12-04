@@ -5,15 +5,12 @@ on:
       os:
         type: string
         default: ubuntu-22.04
-      compiler:
+      cc:
         type: string
-        default: clang-17
-      cmake-version:
+        default: clang-20
+      cxx:
         type: string
-        default: 3.21.7
-      conan-version:
-        type: string
-        default: 1.62.0
+        default: clang++-20
 
       # Branch to compare to
       base-branch:
@@ -102,8 +99,8 @@ jobs:
       - name: Generate version file on feature branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
-          cc: ${{ steps.install_cc.outputs.cc }}
-          cxx: ${{ steps.install_cc.outputs.cxx }}
+          cc: ${{ inputs.cc }}
+          cxx: ${{ inputs.cxx }}
           build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
@@ -124,8 +121,8 @@ jobs:
       - name: Regenerate version file for base branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
-          cc: ${{ steps.install_cc.outputs.cc }}
-          cxx: ${{ steps.install_cc.outputs.cxx }}
+          cc: ${{ inputs.cc }}
+          cxx: ${{ inputs.cxx }}
           build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
