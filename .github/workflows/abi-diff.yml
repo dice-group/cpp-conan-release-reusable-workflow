@@ -54,31 +54,8 @@ jobs:
         shell: bash
     runs-on: ${{ inputs.os }}
     steps:
-      - name: Add repos for for gcc-13 and clang-16,17
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
-
-      - name: Get minimum cmake version
-        uses: lukka/get-cmake@v3.29.6
-        with:
-          cmakeVersion: ${{ inputs.cmake-version }}
-
-      - name: Install compiler
-        id: install_cc
-        uses: rlalik/setup-cpp-compiler@v1.2
-        with:
-          compiler: ${{ inputs.compiler }}
-
-      - name: Install conan
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
-        with:
-          conan-version: ${{ inputs.conan-version }}
-
-      - name: Add conan remotes
+      - name: Conan login
         run: |
-          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
-          
-          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
           conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
 
       - name: Cache conan data
