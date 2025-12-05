@@ -1,5 +1,4 @@
 name: Conan packaging
-
 on:
   workflow_call:
     inputs:
@@ -7,18 +6,14 @@ on:
         type: boolean
         default: false
       os:
-        required: true
         type: string
-        default: ubuntu-22.04
-      compiler:
+        default: ubuntu-24.04
+      cc:
         type: string
-        default: clang-17
-      cmake-version:
+        default: clang-20
+      cxx:
         type: string
-        default: 3.24.0
-      conan-version:
-        type: string
-        default: 2.3.0
+        default: clang++-20
       conan-options:
         type: string
     secrets:
@@ -31,41 +26,10 @@ jobs:
   publish-conan-branch-package:
     name: Creates a conan package for the branch and uploads it to conan.dice-research.org
     runs-on: ${{ inputs.os }}
+    container: ghcr.io/tentris/actions-runner:latest
     steps:
-      # setup env
-      - name: Install tools and requirements
+      - name: Conan login
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq python3 python3-pip
-
-      - name: Add repos for for gcc-13 and clang-16,17
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
-
-      - name: Get minimum cmake version
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: ${{ inputs.cmake-version }}
-
-      - name: Install compiler
-        id: install_cc
-        uses: rlalik/setup-cpp-compiler@v1.2
-        with:
-          compiler: ${{ inputs.compiler }}
-
-      - name: Install mold
-        uses: rui314/setup-mold@v1
-
-      - name: Install conan
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
-        with:
-          conan-version: ${{ inputs.conan-version }}
-
-      - name: add conan user
-        run: |
-          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
-          
-          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
           conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
 
       - name: Cache conan data
@@ -73,7 +37,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.conan2/p
-          key: ${{ inputs.os }}-${{ inputs.compiler }}-reusable-workflow-branch-package
+          key: ${{ inputs.os }}-${{ inputs.cxx }}-reusable-workflow-branch-package
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -95,8 +59,8 @@ jobs:
       - name: Create Package
         shell: bash
         env:
-          CC: ${{ steps.install_cc.outputs.cc }}
-          CXX: ${{ steps.install_cc.outputs.cxx }}
+          CC: ${{ inputs.cc }}
+          CXX: ${{ inputs.cxx }}
         run: |
           (conan remove -f "${{ env.conan_package_identifier }}:*" || true)
           conan create --user "${{ env.conan_package_user }}" --channel "${{ env.conan_package_channel }}" --build missing ${{ inputs.conan-options }} .
