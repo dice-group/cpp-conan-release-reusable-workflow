@@ -53,3 +53,7 @@ export CFLAGS="-march=armv8-a+aes+sha2"
 
 # rustc needs to be able to find libgcc.a libgcc_s.dylib and libstdc++.a
 export RUSTFLAGS="-L${GCC_PREFIX}/lib/gcc/${GCC_VERSION} -L${GCC_PREFIX}/lib/gcc/${GCC_VERSION}/gcc/aarch64-apple-darwin24/${GCC_VERSION}"
+
+# Workaround for issue in aws-lc-sys jitter-entropy component
+# https://github.com/aws/aws-lc-rs/issues/1008
+export AWS_LC_SYS_NO_JITTER_ENTROPY=1
