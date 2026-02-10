@@ -11,6 +11,12 @@ on:
       cxx:
         type: string
         default: clang++-20
+      cmake-version:
+        type: string
+        default: 3.21.7
+      conan-version:
+        type: string
+        default: 2.23.0
 
       # Branch to compare to
       base-branch:
@@ -51,6 +57,48 @@ jobs:
         shell: bash
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Add repos for for gcc-13 and clang-16,17
+        if: inputs.os != 'arc-runner-set-noble'
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
+
+      - name: Get minimum cmake version
+        if: inputs.os != 'arc-runner-set-noble'
+        uses: lukka/get-cmake@v3.29.6
+        with:
+          cmakeVersion: ${{ inputs.cmake-version }}
+
+      - name: Install compiler
+        if: inputs.os != 'arc-runner-set-noble'
+        id: install_cc
+        uses: rlalik/setup-cpp-compiler@v1.2
+        with:
+          compiler: ${{ inputs.cc }}
+
+      - name: Set compiler env installed
+        if: inputs.os != 'arc-runner-set-noble'
+        run: |
+          echo "CC=${{ steps.install_cc.outputs.cc }}" >> $GITHUB_ENV
+          echo "CXX=${{ steps.install_cc.outputs.cxx }}" >> $GITHUB_ENV
+
+      - name: Set compiler env preinstalled
+        if: inputs.os == 'arc-runner-set-noble'
+        run: |
+          echo "CC=${{ inputs.cc }}" >> $GITHUB_ENV
+          echo "CXX=${{ inputs.cxx }}" >> $GITHUB_ENV
+
+      - name: Install conan
+        if: inputs.os != 'arc-runner-set-noble'
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
+        with:
+          conan-version: ${{ inputs.conan-version }}
+
+      - name: Add conan remotes
+        if: inputs.os != 'arc-runner-set-noble'
+        run: |
+          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
+  
+          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
+
       - name: Conan login
         run: |
           conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
@@ -99,15 +147,15 @@ jobs:
       - name: Generate version file on feature branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
-          cc: ${{ inputs.cc }}
-          cxx: ${{ inputs.cxx }}
+          cc: ${{ env.CC }}
+          cxx: ${{ env.CXX }}
           build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch current ABI version
         id: current-abi-version
         run: |
-          ${{ inputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
+          ${{ env.CXX }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-current)
           
           echo "Current ABI version: $abi_version"
@@ -121,15 +169,15 @@ jobs:
       - name: Regenerate version file for base branch
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
         with:
-          cc: ${{ inputs.cc }}
-          cxx: ${{ inputs.cxx }}
+          cc: ${{ env.CC }}
+          cxx: ${{ env.CXX }}
           build-dir: build_dir
           target: ${{ inputs.abi-version-cmake-target }}
 
       - name: Fetch base branch ABI version
         id: base-abi-version
         run: |
-          ${{ inputs.cxx }} -std=c++20 -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
+          ${{ env.CXX }} -std=c++20 -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-base)
           
           echo "Base ABI version: $abi_version"
