@@ -17,6 +17,9 @@ on:
       conan-version:
         type: string
         default: 2.23.0
+      setup_tools:
+        type: boolean
+        default: false
 
       # Branch to compare to
       base-branch:
@@ -58,42 +61,42 @@ jobs:
     runs-on: ${{ inputs.os }}
     steps:
       - name: Add repos for for gcc-13 and clang-16,17
-        if: inputs.os != 'arc-runner-set-noble'
+        if: inputs.setup_tools
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
 
       - name: Get minimum cmake version
-        if: inputs.os != 'arc-runner-set-noble'
+        if: inputs.setup_tools
         uses: lukka/get-cmake@v3.29.6
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
 
       - name: Install compiler
-        if: inputs.os != 'arc-runner-set-noble'
+        if: inputs.setup_tools
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
         with:
           compiler: ${{ inputs.cc }}
 
       - name: Set compiler env installed
-        if: inputs.os != 'arc-runner-set-noble'
+        if: inputs.setup_tools
         run: |
           echo "CC=${{ steps.install_cc.outputs.cc }}" >> $GITHUB_ENV
           echo "CXX=${{ steps.install_cc.outputs.cxx }}" >> $GITHUB_ENV
 
       - name: Set compiler env preinstalled
-        if: inputs.os == 'arc-runner-set-noble'
+        if: inputs.setup_tools == false
         run: |
           echo "CC=${{ inputs.cc }}" >> $GITHUB_ENV
           echo "CXX=${{ inputs.cxx }}" >> $GITHUB_ENV
 
       - name: Install conan
-        if: inputs.os != 'arc-runner-set-noble'
+        if: inputs.setup_tools
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
         with:
           conan-version: ${{ inputs.conan-version }}
 
       - name: Add conan remotes
-        if: inputs.os != 'arc-runner-set-noble'
+        if: inputs.setup_tools
         run: |
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
   
