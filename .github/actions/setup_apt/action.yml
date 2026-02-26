@@ -15,22 +15,10 @@ runs:
         # clang-20
         echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-20 main" | sudo tee /etc/apt/sources.list.d/llvm-20.list
         curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-20.gpg > /dev/null
-       
-        if [[ "$UBUNTU_CODENAME" == "jammy" ]]; then
-          # gcc-13
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          
-          # clang-17
-          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-17 main" | sudo tee /etc/apt/sources.list.d/llvm-17.list
-          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-17.gpg > /dev/null
-          
-          # clang-18
-          echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-18 main" | sudo tee /etc/apt/sources.list.d/llvm-18.list
-          curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-18.gpg > /dev/null
         
-          sudo apt-get update -y
-          sudo apt-get install -y libstdc++-13-dev
-        else
-          sudo apt-get update -y
-          sudo apt-get install -y libstdc++-14-dev
-        fi
+        # clang-21
+        echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-21 main" | sudo tee /etc/apt/sources.list.d/llvm-21.list
+        curl https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/llvm-21.gpg > /dev/null
+
+        sudo apt-get update -y
+        sudo apt-get install -y libstdc++-14-dev
