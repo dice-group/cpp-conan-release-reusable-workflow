@@ -10,17 +10,23 @@ on:
         required: true
         type: string
         default: ubuntu-22.04
-      compiler:
+      cc:
         type: string
-        default: clang-17
+        default: clang-20
+      cxx:
+        type: string
+        default: clang++-20
       cmake-version:
         type: string
         default: 3.24.0
       conan-version:
         type: string
-        default: 2.3.0
+        default: 2.26.0
       conan-options:
         type: string
+      setup-tools:
+        type: boolean
+        default: true
       use-tag: # if true an existing tag/release is update; otherwise the job fails. If true the job will also fail if the tag doesn't match the version reported via conan.
         type: boolean
         default: false
@@ -44,46 +50,70 @@ jobs:
 
       # setup env
       - name: Install tools and requirements
+        if: inputs.setup-tools
         run: |
           sudo apt-get update
           sudo apt-get install -y jq python3 python3-pip
 
       - name: Add repos for for gcc-13 and clang-16,17
+        if: inputs.setup-tools
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
     
       - name: Get minimum cmake version
+        if: inputs.setup-tools
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
 
       - name: Install compiler
+        if: inputs.setup-tools
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
         with:
-          compiler: ${{ inputs.compiler }}
+          compiler: ${{ inputs.cc }}
+
+      - name: Set compiler env installed
+        if: inputs.setup_tools
+        run: |
+          echo "CC=${{ steps.install_cc.outputs.cc }}" >> $GITHUB_ENV
+          echo "CXX=${{ steps.install_cc.outputs.cxx }}" >> $GITHUB_ENV
+
+      - name: Set compiler env preinstalled
+        if: inputs.setup_tools == false
+        run: |
+          echo "CC=${{ inputs.cc }}" >> $GITHUB_ENV
+          echo "CXX=${{ inputs.cxx }}" >> $GITHUB_ENV
 
       - name: Install mold
+        if: inputs.setup-tools
         uses: rui314/setup-mold@v1
 
       - name: Install conan
+        if: inputs.setup-tools
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
         with:
           conan-version: ${{ inputs.conan-version }}
 
-      - name: add conan user
+      - name: add conan remotes
+        if: inputs.setup-tools
         run: |
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
-          
           conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
-          conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
+
+      - name: conan login
+        env:
+          CONAN_USER: ${{ secrets.CONAN_USER }}
+          CONAN_PW: ${{ secrets.CONAN_PW }}
+        run: |
+          conan remote login -p "$CONAN_PW" dice-group "$CONAN_USER"
+          conan remote login -p "$CONAN_PW" tentris-private "$CONAN_USER"
 
       - name: Cache conan data
         id: cache-conan
         uses: actions/cache@v4
         with:
           path: ~/.conan2/p
-          key: ${{ inputs.os }}-${{ inputs.compiler }}-conan-reusable-workflow-release
+          key: ${{ inputs.os }}-${{ inputs.cc }}-conan-reusable-workflow-release
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -109,8 +139,8 @@ jobs:
 
       - name: Create Package
         env:
-          CC: ${{ steps.install_cc.outputs.cc }}
-          CXX: ${{ steps.install_cc.outputs.cxx }}
+          CC: ${{ env.CC }}
+          CXX: ${{ env.CXX }}
         run: |
           (conan remove -f "${{ env.conan_package_identifier }}:*" || true)
           conan create --build missing ${{ inputs.conan-options }} .
