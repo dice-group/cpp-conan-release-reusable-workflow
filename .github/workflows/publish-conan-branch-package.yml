@@ -21,7 +21,7 @@ on:
         default: 2.3.0
       conan-options:
         type: string
-      setup_tools:
+      setup-tools:
         type: boolean
         default: true
     secrets:
@@ -37,40 +37,40 @@ jobs:
     steps:
       # setup env
       - name: Install tools and requirements
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         run: |
           sudo apt-get update
           sudo apt-get install -y jq python3 python3-pip
 
       - name: Add repos for for gcc-13 and clang-16,17
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
 
       - name: Get minimum cmake version
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
 
       - name: Install compiler
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
         with:
           compiler: ${{ inputs.compiler }}
 
       - name: Install mold
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         uses: rui314/setup-mold@v1
 
       - name: Install conan
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
         with:
           conan-version: ${{ inputs.conan-version }}
 
       - name: add conan remotes
-        if: inputs.setup_tools
+        if: inputs.setup-tools
         run: |
           conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
           conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
