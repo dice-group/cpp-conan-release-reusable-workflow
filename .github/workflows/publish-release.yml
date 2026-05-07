@@ -10,15 +10,18 @@ on:
         required: true
         type: string
         default: ubuntu-22.04
-      compiler:
+      cc:
         type: string
-        default: clang-17
+        default: clang-20
+      cxx:
+        type: string
+        default: clang++-20
       cmake-version:
         type: string
         default: 3.24.0
       conan-version:
         type: string
-        default: 2.3.0
+        default: 2.26.0
       conan-options:
         type: string
       setup-tools:
@@ -67,7 +70,19 @@ jobs:
         id: install_cc
         uses: rlalik/setup-cpp-compiler@v1.2
         with:
-          compiler: ${{ inputs.compiler }}
+          compiler: ${{ inputs.cc }}
+
+      - name: Set compiler env installed
+        if: inputs.setup_tools
+        run: |
+          echo "CC=${{ steps.install_cc.outputs.cc }}" >> $GITHUB_ENV
+          echo "CXX=${{ steps.install_cc.outputs.cxx }}" >> $GITHUB_ENV
+
+      - name: Set compiler env preinstalled
+        if: inputs.setup_tools == false
+        run: |
+          echo "CC=${{ inputs.cc }}" >> $GITHUB_ENV
+          echo "CXX=${{ inputs.cxx }}" >> $GITHUB_ENV
 
       - name: Install mold
         if: inputs.setup-tools
@@ -98,7 +113,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.conan2/p
-          key: ${{ inputs.os }}-${{ inputs.compiler }}-conan-reusable-workflow-release
+          key: ${{ inputs.os }}-${{ inputs.cc }}-conan-reusable-workflow-release
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -124,8 +139,8 @@ jobs:
 
       - name: Create Package
         env:
-          CC: ${{ steps.install_cc.outputs.cc }}
-          CXX: ${{ steps.install_cc.outputs.cxx }}
+          CC: ${{ env.CC }}
+          CXX: ${{ env.CXX }}
         run: |
           (conan remove -f "${{ env.conan_package_identifier }}:*" || true)
           conan create --build missing ${{ inputs.conan-options }} .
