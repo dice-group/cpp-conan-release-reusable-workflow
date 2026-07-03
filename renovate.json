@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "dependencyDashboard": false,
+  "gitAuthor": "Adrian Macal <adrian@tentris.io>",
+  "prHourlyLimit": 0,
+  "rebaseWhen": "behind-base-branch",
+  "enabledManagers": [
+    "github-actions"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "actions/checkout"
+      ],
+      "enabled": false
+    }
+  ]
+}
