@@ -19,5 +19,12 @@ jobs:
           RENOVATE_AUTODISCOVER_FILTER: 'dice-group/*'
           RENOVATE_DRY_RUN: 'true'
           RENOVATE_CONFIG_FILE: renovate.json
+          RENOVATE_REPOSITORY_CACHE: 'enabled'
+          RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/'
+          RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
+          RENOVATE_S3_PATH_STYLE: 'true'
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_USER }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_PASSWORD }}
+          AWS_REGION: 'eu-central-1'
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
