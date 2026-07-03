@@ -1,0 +1,33 @@
+name: Pin Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  pin-internal-refs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Pin Internal Actions References
+        run: |
+          export VERSION="${GITHUB_REF_NAME}"
+          export REPOREF="dice-group/cpp-conan-release-reusable-workflow"
+
+          sed -i -E "s#(${REPOREF}/\.github/actions/[A-Za-z0-9_-]+)@main#\1@${VERSION}#g" .github/workflows/*.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No @main references found, nothing to pin."
+            exit 0
+          fi
+
+          git commit -am "Pin internal actions to ${VERSION} for release"
+          git tag -f "${VERSION}"
+          git push origin "${VERSION}" --force
