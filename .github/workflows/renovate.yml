@@ -18,5 +18,6 @@ jobs:
           RENOVATE_AUTODISCOVER: 'true'
           RENOVATE_AUTODISCOVER_FILTER: 'dice-group/*'
           RENOVATE_DRY_RUN: 'true'
+          RENOVATE_CONFIG_FILE: renovate.json
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
