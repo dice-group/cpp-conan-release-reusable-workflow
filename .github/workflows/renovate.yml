@@ -17,7 +17,6 @@ jobs:
         env:
           RENOVATE_AUTODISCOVER: 'true'
           RENOVATE_AUTODISCOVER_FILTER: 'dice-group/*'
-          RENOVATE_DRY_RUN: 'true'
           RENOVATE_CONFIG_FILE: renovate.json
           RENOVATE_REPOSITORY_CACHE: 'enabled'
           RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/'

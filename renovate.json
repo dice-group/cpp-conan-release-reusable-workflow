@@ -6,6 +6,9 @@
   ],
   "onboarding": false,
   "requireConfig": "ignored",
+  "vulnerabilityAlerts": {
+    "enabled": false
+  },
   "gitAuthor": "Adrian Macal <adrian@tentris.io>",
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
