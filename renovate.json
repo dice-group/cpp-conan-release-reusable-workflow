@@ -3,6 +3,8 @@
   "extends": [
     "config:recommended"
   ],
+  "onboarding": false,
+  "requireConfig": "ignored",
   "dependencyDashboard": false,
   "gitAuthor": "Adrian Macal <adrian@tentris.io>",
   "prHourlyLimit": 0,
