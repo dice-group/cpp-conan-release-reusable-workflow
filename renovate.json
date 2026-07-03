@@ -1,11 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":disableDependencyDashboard"
   ],
   "onboarding": false,
   "requireConfig": "ignored",
-  "dependencyDashboard": false,
   "gitAuthor": "Adrian Macal <adrian@tentris.io>",
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
