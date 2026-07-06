@@ -3,7 +3,7 @@ name: Pin Release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'r[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: write
@@ -13,20 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
       - name: Pin Internal Actions References
         run: |
-          export VERSION="${GITHUB_REF_NAME}"
+          export VERSION="v${GITHUB_REF_NAME#r}"
           export REPOREF="dice-group/cpp-conan-release-reusable-workflow"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag ${VERSION} already exists."
+            exit 1
+          fi
 
           sed -i -E "s#(${REPOREF}/\.github/actions/[A-Za-z0-9_-]+)@main#\1@${VERSION}#g" .github/workflows/*.yml
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          if git diff --quiet; then
-            echo "No @main references found, nothing to pin."
-            exit 0
-          fi
 
           git commit -am "Pin internal actions to ${VERSION} for release"
           git tag -f "${VERSION}"
