@@ -27,7 +27,7 @@
         "github-actions"
       ],
       "matchDepNames": [
-        "dice-group/cpp-conan-release-reusable-workflow/**"
+        "dice-group/cpp-conan-release-reusable-workflow"
       ],
       "enabled": true
     }
