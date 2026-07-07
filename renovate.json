@@ -27,9 +27,9 @@
         "github-actions"
       ],
       "matchDepNames": [
-        "actions/checkout"
+        "dice-group/cpp-conan-release-reusable-workflow/**"
       ],
-      "enabled": false
+      "enabled": true
     }
   ]
 }
