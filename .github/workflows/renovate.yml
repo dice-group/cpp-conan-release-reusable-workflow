@@ -25,6 +25,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_USER }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_PASSWORD }}
           AWS_REGION: 'eu-central-1'
+          GIT_TERMINAL_PROMPT: '0'
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
-          env-regex: '^(?:RENOVATE_\w+|AWS_\w+)$'
+          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
