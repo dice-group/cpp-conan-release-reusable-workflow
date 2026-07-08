@@ -13,13 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Fingerprint Renovate Config
+        id: config-fingerprint
+        run: echo "hash=$(scripts/renovate-hash.sh)" >> "$GITHUB_OUTPUT"
       - uses: renovatebot/github-action@v46.1.17
         env:
           RENOVATE_AUTODISCOVER: 'true'
           RENOVATE_AUTODISCOVER_FILTER: 'dice-group/*'
           RENOVATE_CONFIG_FILE: renovate.json
           RENOVATE_REPOSITORY_CACHE: 'enabled'
-          RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/'
+          RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/${{ steps.config-fingerprint.outputs.hash }}/'
           RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
           RENOVATE_S3_PATH_STYLE: 'true'
           AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_USER }}
@@ -29,3 +32,12 @@ jobs:
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
           env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
+      - name: Prune orphaned cache entries
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        env:
+          MINIO_USER: ${{ secrets.MINIO_USER }}
+          MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+        with:
+          inheritEnv: true
+          push: never
+          runCmd: scripts/renovate-prune.sh ${{ steps.config-fingerprint.outputs.hash }}
