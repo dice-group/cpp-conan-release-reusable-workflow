@@ -20,6 +20,15 @@
       "matchManagers": [
         "github-actions"
       ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "dice-group/cpp-conan-release-reusable-workflow"
+      ],
       "enabled": true
     }
   ]
