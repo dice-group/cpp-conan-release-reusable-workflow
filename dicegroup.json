@@ -27,10 +27,11 @@
       "matchManagers": [
         "github-actions"
       ],
-      "matchDepNames": [
-        "dice-group/cpp-conan-release-reusable-workflow"
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
-      "enabled": true
+      "automerge": true
     }
   ]
 }
