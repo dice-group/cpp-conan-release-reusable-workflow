@@ -8,19 +8,39 @@ on:
   schedule:
     - cron: '0 7 * * *'
 
+env:
+  DICE_GROUP_REPO_1: 'dice-group/hypertrie'
+  DICE_GROUP_REPO_2: 'dice-group/sparql-parser-base'
+  DICE_GROUP_REPO_3: 'dice-group/dice-template-library'
+  DICE_GROUP_REPO_4: 'dice-group/dice-hash'
+  DICE_GROUP_REPO_5: 'dice-group/dice-sparse-map'
+  DICE_GROUP_REPO_6: 'dice-group/metall-ffi'
+  DICE_GROUP_REPO_7: 'dice-group/cpp-conan-release-reusable-workflow-test'
+
 jobs:
   renovate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
       - name: Fingerprint Renovate Config
         id: config-fingerprint
-        run: echo "hash=$(scripts/renovate-hash.sh)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "repos=$(scripts/renovate-repos.sh)" >> "$GITHUB_OUTPUT"
+          echo "hash=$(scripts/renovate-hash.sh dicegroup.json)" >> "$GITHUB_OUTPUT"
+
+      - uses: renovatebot/github-action@v46.1.18
+        env:
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
+
       - uses: renovatebot/github-action@v46.1.17
         env:
-          RENOVATE_AUTODISCOVER: 'true'
-          RENOVATE_AUTODISCOVER_FILTER: 'dice-group/*'
-          RENOVATE_CONFIG_FILE: renovate.json
+          RENOVATE_AUTODISCOVER: 'false'
+          RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.repos }}
+          RENOVATE_BASE_BRANCHES: '["develop"]'
+          RENOVATE_CONFIG_FILE: dicegroup.json
           RENOVATE_REPOSITORY_CACHE: 'enabled'
           RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/${{ steps.config-fingerprint.outputs.hash }}/'
           RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
@@ -32,6 +52,7 @@ jobs:
         with:
           token: ${{ secrets.RENOVATE_TOKEN }}
           env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
+
       - name: Prune orphaned cache entries
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         env:
