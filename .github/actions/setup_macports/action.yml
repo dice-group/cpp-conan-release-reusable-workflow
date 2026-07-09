@@ -4,7 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Cache MacPorts
-      uses: actions/cache@6.1.0
+      uses: actions/cache@v6.1.0
       id: cache-macports
       with:
         path: /opt/local/
