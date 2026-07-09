@@ -73,7 +73,7 @@ jobs:
       - name: Install compiler
         if: inputs.setup_tools
         id: install_cc
-        uses: rlalik/setup-cpp-compiler@v1.2
+        uses: rlalik/setup-cpp-compiler@v2
         with:
           compiler: ${{ inputs.cc }}
 
