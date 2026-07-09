@@ -76,7 +76,7 @@ jobs:
           key: ${{ inputs.os }}-${{ inputs.compiler }}-reusable-workflow-branch-package
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@7.0.0
 
       - name: Collect package information
         shell: bash
