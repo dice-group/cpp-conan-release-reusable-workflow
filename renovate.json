@@ -7,6 +7,9 @@
   "vulnerabilityAlerts": {
     "enabled": false
   },
+  "assignees": [
+    "adrian-tentris"
+  ],
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
   "enabledManagers": [
