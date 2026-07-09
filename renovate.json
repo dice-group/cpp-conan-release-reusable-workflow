@@ -17,6 +17,7 @@
       "matchManagers": [
         "github-actions"
       ],
+      "enabled": true,
       "extractVersion": "^v(?<version>\\d+\\.\\d+\\.\\d+)$"
     },
     {
@@ -27,8 +28,7 @@
         "minor",
         "patch"
       ],
-      "automerge": true,
-      "extractVersion": "^v(?<version>\\d+\\.\\d+\\.\\d+)$"
+      "automerge": true
     }
   ]
 }
