@@ -20,7 +20,8 @@
       "matchManagers": [
         "github-actions"
       ],
-      "enabled": false
+      "enabled": true,
+      "extractVersion": "^(?<version>v\\d+\\.\\d+\\.\\d+)$"
     },
     {
       "matchManagers": [
