@@ -10,6 +10,9 @@
     "enabled": false
   },
   "gitAuthor": "Adrian Macal <adrian@tentris.io>",
+  "assignees": [
+    "adrian-tentris"
+  ],
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
   "enabledManagers": [
