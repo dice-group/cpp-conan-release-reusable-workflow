@@ -18,7 +18,7 @@
         "github-actions"
       ],
       "enabled": true,
-      "extractVersion": "^v(?<version>\\d+\\.\\d+\\.\\d+)$"
+      "extractVersion": "^(?<version>v\\d+\\.\\d+\\.\\d+)$"
     },
     {
       "matchManagers": [
