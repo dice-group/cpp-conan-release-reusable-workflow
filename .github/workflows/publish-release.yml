@@ -25,9 +25,11 @@ on:
         type: boolean
         default: false
     secrets:
-      CONAN_USER:
+      CONAN_CICD_USERNAME:
         required: true
-      CONAN_PW:
+      CONAN_CICD_PASSWORD:
+        required: true
+      CONAN_CICD_ENDPOINT:
         required: true
 
 jobs:
@@ -72,11 +74,11 @@ jobs:
 
       - name: add conan user
         run: |
-          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-          conan remote login -p "${{ secrets.CONAN_PW }}" dice-group "${{ secrets.CONAN_USER }}"
-          
-          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
-          conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
+          conan remote add dice-group "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris"
+          conan remote login -p "${{ secrets.CONAN_CICD_PASSWORD }}" dice-group "${{ secrets.CONAN_CICD_USERNAME }}"
+
+          conan remote add tentris-private "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris-private"
+          conan remote login -p "${{ secrets.CONAN_CICD_PASSWORD }}" tentris-private "${{ secrets.CONAN_CICD_USERNAME }}"
 
       - name: Cache conan data
         id: cache-conan
