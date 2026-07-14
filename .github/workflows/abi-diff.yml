@@ -47,9 +47,11 @@ on:
         required: true
 
     secrets:
-      CONAN_USER:
+      CONAN_CICD_USERNAME:
         required: true
-      CONAN_PW:
+      CONAN_CICD_PASSWORD:
+        required: true
+      CONAN_CICD_ENDPOINT:
         required: true
 
 jobs:
@@ -98,13 +100,12 @@ jobs:
       - name: Add conan remotes
         if: inputs.setup_tools
         run: |
-          conan remote add dice-group https://conan.dice-research.org/artifactory/api/conan/tentris
-  
-          conan remote add tentris-private https://conan.dice-research.org/artifactory/api/conan/tentris-private
+          conan remote add dice-group "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris"
+          conan remote add tentris-private "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris-private"
 
       - name: Conan login
         run: |
-          conan remote login -p "${{ secrets.CONAN_PW }}" tentris-private "${{ secrets.CONAN_USER }}"
+          conan remote login -p "${{ secrets.CONAN_CICD_PASSWORD }}" tentris-private "${{ secrets.CONAN_CICD_USERNAME }}"
 
       - name: Cache conan data
         id: cache-conan
@@ -142,7 +143,7 @@ jobs:
           # the line below these two it doesn't work
           base_branch="${{ inputs.base-branch }}"
           search_path="${{ inputs.search-path }}"
-          
+
           diff_lines=$(git diff "remotes/origin/$base_branch" -- $search_path | wc -l)
           echo "Diff has $diff_lines lines"
           echo "nlines=$diff_lines" >> "$GITHUB_OUTPUT"
@@ -160,7 +161,7 @@ jobs:
         run: |
           ${{ env.CXX }} -std=c++20 -I. -o /tmp/detect-abi-version-current /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-current)
-          
+
           echo "Current ABI version: $abi_version"
           echo "abi_version=$abi_version" >> "$GITHUB_OUTPUT"
 
@@ -182,7 +183,7 @@ jobs:
         run: |
           ${{ env.CXX }} -std=c++20 -I. -o /tmp/detect-abi-version-base /tmp/detect-abi-version.cpp
           abi_version=$(/tmp/detect-abi-version-base)
-          
+
           echo "Base ABI version: $abi_version"
           echo "abi_version=$abi_version" >> "$GITHUB_OUTPUT"
 
