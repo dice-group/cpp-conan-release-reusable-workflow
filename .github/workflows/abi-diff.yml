@@ -48,9 +48,9 @@ on:
 
     secrets:
       CONAN_CICD_USERNAME:
-        required: true
+        required: false
       CONAN_CICD_PASSWORD:
-        required: true
+        required: false
       CONAN_CICD_ENDPOINT:
         required: true
 
@@ -97,14 +97,24 @@ jobs:
         with:
           conan-version: ${{ inputs.conan-version }}
 
+      - name: Check whether conan credentials were provided
+        id: conan-creds
+        run: |
+          if [[ -n "${{ secrets.CONAN_CICD_USERNAME }}" && -n "${{ secrets.CONAN_CICD_PASSWORD }}" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Add conan remotes
         if: inputs.setup_tools
         run: |
           conan remote add dice-group "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris"
-          conan remote add tentris-private "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris-private"
 
-      - name: Conan login
+      - name: Add private conan remote and login
+        if: inputs.setup_tools && steps.conan-creds.outputs.available == 'true'
         run: |
+          conan remote add tentris-private "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris-private"
           conan remote login -p "${{ secrets.CONAN_CICD_PASSWORD }}" tentris-private "${{ secrets.CONAN_CICD_USERNAME }}"
 
       - name: Cache conan data

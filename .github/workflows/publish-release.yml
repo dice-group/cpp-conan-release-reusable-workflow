@@ -34,7 +34,7 @@ on:
 
 jobs:
   publish-release:
-    name: Creates a release for the current version defined in CMake and uploads a Conan package to conan.dice-research.org. Fails if release for the version exists already.
+    name: Creates a release for the current version defined in CMake and uploads a Conan package to conan.tentris.io. Fails if release for the version exists already.
     defaults:
       run:
         shell: bash
@@ -52,7 +52,7 @@ jobs:
 
       - name: Add repos for for gcc-13 and clang-16,17
         uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
-    
+
       - name: Get minimum cmake version
         uses: lukka/get-cmake@latest
         with:
@@ -102,7 +102,7 @@ jobs:
       - name: Fail if use-tag and tag is not equal to package version from conan inspect
         if: ${{ inputs.use-tag &&  github.ref_name != format('v{0}', env.conan_package_version) }}
         run: exit 1
-      
+
       - name: Create github release
         uses: ncipollo/release-action@v1
         with:
