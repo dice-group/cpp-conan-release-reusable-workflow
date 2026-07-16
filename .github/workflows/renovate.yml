@@ -16,6 +16,7 @@ env:
   DICE_GROUP_REPO_5: 'dice-group/dice-sparse-map'
   DICE_GROUP_REPO_6: 'dice-group/metall-ffi'
   DICE_GROUP_REPO_7: 'dice-group/cpp-conan-release-reusable-workflow-test'
+  TENTRIS_REPO_1: 'tentris/rdf4cpp'
 
 jobs:
   renovate:
@@ -26,24 +27,27 @@ jobs:
       - name: Fingerprint Renovate Config
         id: config-fingerprint
         run: |
-          echo "repos=$(scripts/renovate-repos.sh)" >> "$GITHUB_OUTPUT"
-          echo "hash=$(scripts/renovate-hash.sh dicegroup.json)" >> "$GITHUB_OUTPUT"
+          echo "dice_repos=$(scripts/renovate-repos.sh DICE_GROUP_REPO)" >> "$GITHUB_OUTPUT"
+          echo "dice_hash=$(scripts/renovate-hash.sh dicegroup.json)" >> "$GITHUB_OUTPUT"
+          echo "tentris_repos=$(scripts/renovate-repos.sh TENTRIS_REPO)" >> "$GITHUB_OUTPUT"
+          echo "tentris_hash=$(scripts/renovate-hash.sh tentris.json)" >> "$GITHUB_OUTPUT"
 
-      - uses: renovatebot/github-action@v46.1.19
+      - name: Run Renovate for this repository
+        uses: renovatebot/github-action@v46.1.19
         env:
           RENOVATE_REPOSITORIES: ${{ github.repository }}
-          RENOVATE_GIT_AUTHOR: 'Adrian Macal <adrian@tentris.io>'
         with:
-          token: ${{ secrets.RENOVATE_TOKEN }}
+          token: ${{ secrets.RENOVATE_TOKEN_DICEGROUP }}
 
-      - uses: renovatebot/github-action@v46.1.19
+      - name: Run Renovate for Dice Group Repositories
+        uses: renovatebot/github-action@v46.1.19
         env:
           RENOVATE_AUTODISCOVER: 'false'
-          RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.repos }}
+          RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.dice_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
           RENOVATE_CONFIG_FILE: dicegroup.json
           RENOVATE_REPOSITORY_CACHE: 'enabled'
-          RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/${{ steps.config-fingerprint.outputs.hash }}/'
+          RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/${{ steps.config-fingerprint.outputs.dice_hash }}/'
           RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
           RENOVATE_S3_PATH_STYLE: 'true'
           AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_USER }}
@@ -51,10 +55,29 @@ jobs:
           AWS_REGION: 'eu-central-1'
           GIT_TERMINAL_PROMPT: '0'
         with:
-          token: ${{ secrets.RENOVATE_TOKEN }}
+          token: ${{ secrets.RENOVATE_TOKEN_DICEGROUP }}
           env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
 
-      - name: Prune orphaned cache entries
+      - name: Run Renovate for Tentris Repositories
+        uses: renovatebot/github-action@v46.1.19
+        env:
+          RENOVATE_AUTODISCOVER: 'false'
+          RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.tentris_repos }}
+          RENOVATE_BASE_BRANCHES: '["develop"]'
+          RENOVATE_CONFIG_FILE: tentris.json
+          RENOVATE_REPOSITORY_CACHE: 'enabled'
+          RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/tentris/${{ steps.config-fingerprint.outputs.tentris_hash }}/'
+          RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
+          RENOVATE_S3_PATH_STYLE: 'true'
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_USER }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_PASSWORD }}
+          AWS_REGION: 'eu-central-1'
+          GIT_TERMINAL_PROMPT: '0'
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN_TENTRIS }}
+          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
+
+      - name: Prune Dice Group orphaned cache entries
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         env:
           MINIO_USER: ${{ secrets.MINIO_USER }}
@@ -62,4 +85,14 @@ jobs:
         with:
           inheritEnv: true
           push: never
-          runCmd: scripts/renovate-prune.sh ${{ steps.config-fingerprint.outputs.hash }}
+          runCmd: scripts/renovate-prune.sh dice-group ${{ steps.config-fingerprint.outputs.dice_hash }}
+
+      - name: Prune Tentris orphaned cache entries
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        env:
+          MINIO_USER: ${{ secrets.MINIO_USER }}
+          MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+        with:
+          inheritEnv: true
+          push: never
+          runCmd: scripts/renovate-prune.sh tentris ${{ steps.config-fingerprint.outputs.tentris_hash }}
