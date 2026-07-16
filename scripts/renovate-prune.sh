@@ -2,9 +2,10 @@
 set -euo pipefail
 
 BUCKET="tentris-renovate"
-CACHE_PREFIX="cache/dice-group/"
 ENDPOINT="https://fsn1.your-objectstorage.com"
-KEEP_KEY="${1:?KEEP_KEY is not set}"
+NAMESPACE="${1:?NAMESPACE is not set}"
+KEEP_KEY="${2:?KEEP_KEY is not set}"
+CACHE_PREFIX="cache/${NAMESPACE}/"
 
 export AWS_ACCESS_KEY_ID="${MINIO_USER:?MINIO_USER is not set}"
 export AWS_SECRET_ACCESS_KEY="${MINIO_PASSWORD:?MINIO_PASSWORD is not set}"
