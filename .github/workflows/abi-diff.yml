@@ -107,14 +107,13 @@ jobs:
           fi
 
       - name: Add conan remotes
-        if: inputs.setup_tools
         run: |
-          conan remote add dice-group "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris"
+          conan remote add -f dice-group "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris"
 
       - name: Add private conan remote and login
-        if: inputs.setup_tools && steps.conan-creds.outputs.available == 'true'
+        if: steps.conan-creds.outputs.available == 'true'
         run: |
-          conan remote add tentris-private "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris-private"
+          conan remote add -f tentris-private "${{ secrets.CONAN_CICD_ENDPOINT }}/tentris-private"
           conan remote login -p "${{ secrets.CONAN_CICD_PASSWORD }}" tentris-private "${{ secrets.CONAN_CICD_USERNAME }}"
 
       - name: Cache conan data
