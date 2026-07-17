@@ -68,7 +68,7 @@ jobs:
 
       - name: Get minimum cmake version
         if: inputs.setup_tools
-        uses: lukka/get-cmake@v4.3.4
+        uses: lukka/get-cmake@v4.4.0
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
 
