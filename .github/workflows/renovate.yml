@@ -17,7 +17,11 @@ env:
   DICE_GROUP_REPO_6: 'dice-group/metall-ffi'
   DICE_GROUP_REPO_7: 'dice-group/cpp-conan-release-reusable-workflow-test'
   TENTRIS_REPO_1: 'tentris/rdf4cpp'
-  TENTRIS_REPO_2: 'tentris/hypertrie'
+  TENTRIS_REPO_2: 'tentris/rdf4cpp-private'
+  TENTRIS_REPO_3: 'tentris/hypertrie'
+  TENTRIS_REPO_4: 'tentris/tentris-storage'
+  TENTRIS_REPO_5: 'tentris/tentris-lib'
+  TENTRIS_REPO_6: 'tentris/tentris-frontend'
 
 jobs:
   renovate:
