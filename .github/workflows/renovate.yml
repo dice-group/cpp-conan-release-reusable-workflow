@@ -17,6 +17,7 @@ env:
   DICE_GROUP_REPO_6: 'dice-group/metall-ffi'
   DICE_GROUP_REPO_7: 'dice-group/cpp-conan-release-reusable-workflow-test'
   TENTRIS_REPO_1: 'tentris/rdf4cpp'
+  TENTRIS_REPO_2: 'tentris/hypertrie'
 
 jobs:
   renovate:
