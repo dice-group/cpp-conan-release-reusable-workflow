@@ -38,14 +38,14 @@ jobs:
           echo "tentris_hash=$(scripts/renovate-hash.sh tentris.json)" >> "$GITHUB_OUTPUT"
 
       - name: Run Renovate for this repository
-        uses: renovatebot/github-action@v46.1.19
+        uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_REPOSITORIES: ${{ github.repository }}
         with:
           token: ${{ secrets.RENOVATE_TOKEN_DICEGROUP }}
 
       - name: Run Renovate for Dice Group Repositories
-        uses: renovatebot/github-action@v46.1.19
+        uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_AUTODISCOVER: 'false'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.dice_repos }}
@@ -64,7 +64,7 @@ jobs:
           env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
 
       - name: Run Renovate for Tentris Repositories
-        uses: renovatebot/github-action@v46.1.19
+        uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_AUTODISCOVER: 'false'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.tentris_repos }}
