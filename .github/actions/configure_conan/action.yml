@@ -11,15 +11,17 @@ runs:
       - name: Install conan
         shell: bash
         run: |
-          if [[ "$(uname -s)" == "Linux" ]]; then
-            source /etc/os-release
+          if command -v conan &> /dev/null; then
+            echo "conan is already installed, skipping installation"
 
+          elif [[ "$(uname -s)" == "Linux" ]]; then
+            source /etc/os-release
             sudo apt-get install -y pipx
-            pipx install --force "conan==${{ inputs.conan-version }}"
+            pipx install "conan==${{ inputs.conan-version }}"
           else
             # assume macOS
             brew install pipx
-            pipx install --force "conan==${{ inputs.conan-version }}"
+            pipx install "conan==${{ inputs.conan-version }}"
           fi
 
       - name: configure conan
