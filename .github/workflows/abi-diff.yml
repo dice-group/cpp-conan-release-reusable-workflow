@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Add repos for for gcc-13 and clang-16,17
         if: inputs.setup_tools
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@main
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/setup_apt@v2.0.3
 
       - name: Get minimum cmake version
         if: inputs.setup_tools
@@ -93,7 +93,7 @@ jobs:
 
       - name: Install conan
         if: inputs.setup_tools
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@main
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/configure_conan@v2.0.3
         with:
           conan-version: ${{ inputs.conan-version }}
 
@@ -128,7 +128,7 @@ jobs:
           fetch-depth: 0  # needed to check out all branches for this Action to work
 
       - name: Get dependency provider
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/add_conan_provider@main
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/add_conan_provider@v2.0.3
 
       - name: Create ABI version detection program
         run: |
@@ -158,7 +158,7 @@ jobs:
           echo "nlines=$diff_lines" >> "$GITHUB_OUTPUT"
 
       - name: Generate version file on feature branch
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@v2.0.3
         with:
           cc: ${{ env.CC }}
           cxx: ${{ env.CXX }}
@@ -180,7 +180,7 @@ jobs:
           git switch ${{ inputs.base-branch }}
 
       - name: Regenerate version file for base branch
-        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@main
+        uses: dice-group/cpp-conan-release-reusable-workflow/.github/actions/generate_version_file@v2.0.3
         with:
           cc: ${{ env.CC }}
           cxx: ${{ env.CXX }}
