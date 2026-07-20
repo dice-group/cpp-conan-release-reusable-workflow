@@ -13,13 +13,13 @@ runs:
         run: |
           if [[ "$(uname -s)" == "Linux" ]]; then
             source /etc/os-release
-            
+
             sudo apt-get install -y pipx
-            pipx install "conan==${{ inputs.conan-version }}"
+            pipx install --force "conan==${{ inputs.conan-version }}"
           else
             # assume macOS
             brew install pipx
-            pipx install "conan==${{ inputs.conan-version }}"
+            pipx install --force "conan==${{ inputs.conan-version }}"
           fi
 
       - name: configure conan
@@ -27,9 +27,9 @@ runs:
         run: |
           # conan profile update is deprecated (https://github.com/conan-io/conan/issues/13205)
           # and they don't want you to use detect because it is unstable
-          
+
           conan profile detect > /dev/null 2>&1  # Force creation of conan directory structure, will be overwritten
-          
+
           echo '{% set compiler, version, c_exe = detect_api.detect_default_compiler() %}'      > ~/.conan2/profiles/default
           echo '[settings]'                                                                    >> ~/.conan2/profiles/default
           echo 'os={{ detect_api.detect_os() }}'                                               >> ~/.conan2/profiles/default
@@ -39,6 +39,6 @@ runs:
           echo 'compiler.version={{ detect_api.default_compiler_version(compiler, version) }}' >> ~/.conan2/profiles/default
           echo 'compiler.libcxx=libstdc++11'                                                   >> ~/.conan2/profiles/default
           echo 'compiler.cppstd=23'                                                            >> ~/.conan2/profiles/default
-          
+
           echo "Created conan profile:"
           cat ~/.conan2/profiles/default
