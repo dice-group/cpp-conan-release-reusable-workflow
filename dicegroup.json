@@ -16,7 +16,21 @@
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
   "enabledManagers": [
-    "github-actions"
+    "github-actions",
+    "custom.regex"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "conan-version:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+      ],
+      "datasourceTemplate": "pypi",
+      "depNameTemplate": "conan"
+    }
   ],
   "packageRules": [
     {
@@ -29,6 +43,16 @@
     {
       "matchManagers": [
         "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "matchDepNames": [
+        "conan"
       ],
       "matchUpdateTypes": [
         "minor",
