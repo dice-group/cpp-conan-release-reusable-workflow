@@ -25,7 +25,7 @@ jobs:
             exit 1
           fi
 
-          sed -i -E "s#(${REPOREF}/\.github/actions/[A-Za-z0-9_-]+)@main#\1@${VERSION}#g" .github/workflows/*.yml
+          sed -i -E "s#(${REPOREF}/\.github/actions/[A-Za-z0-9_-]+)@conan-detect#\1@${VERSION}#g" .github/workflows/*.yml
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
