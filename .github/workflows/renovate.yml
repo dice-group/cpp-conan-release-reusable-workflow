@@ -48,7 +48,7 @@ jobs:
         uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_AUTODISCOVER: 'false'
-          RENOVATE_DRY_RUN: 'extract'
+          RENOVATE_DRY_RUN: 'lookup'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.dice_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
           RENOVATE_CONFIG_FILE: dicegroup.json
@@ -68,7 +68,7 @@ jobs:
         uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_AUTODISCOVER: 'false'
-          RENOVATE_DRY_RUN: 'extract'
+          RENOVATE_DRY_RUN: 'lookup'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.tentris_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
           RENOVATE_CONFIG_FILE: tentris.json
