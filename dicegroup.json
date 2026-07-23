@@ -17,7 +17,8 @@
   "rebaseWhen": "behind-base-branch",
   "enabledManagers": [
     "github-actions",
-    "custom.regex"
+    "custom.regex",
+    "conan"
   ],
   "customManagers": [
     {
