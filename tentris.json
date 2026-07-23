@@ -32,6 +32,18 @@
       ],
       "datasourceTemplate": "pypi",
       "depNameTemplate": "conan"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "cmake-version:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "Kitware/CMake",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
   "packageRules": [
@@ -61,6 +73,17 @@
         "patch"
       ],
       "automerge": true
+    },
+    {
+      "matchDepNames": [
+        "Kitware/CMake"
+      ],
+      "reviewers": [
+        "liss-h"
+      ],
+      "assignees": [
+        "adrian-tentris"
+      ]
     }
   ]
 }
