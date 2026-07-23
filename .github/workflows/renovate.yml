@@ -48,8 +48,6 @@ jobs:
         uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_AUTODISCOVER: 'false'
-          RENOVATE_DRY_RUN: 'lookup'
-          LOG_LEVEL: 'debug'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.dice_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
           RENOVATE_CONFIG_FILE: dicegroup.json
@@ -63,14 +61,12 @@ jobs:
           GIT_TERMINAL_PROMPT: '0'
         with:
           token: ${{ secrets.RENOVATE_TOKEN_DICEGROUP }}
-          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+|LOG_LEVEL)$'
+          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
 
       - name: Run Renovate for Tentris Repositories
         uses: renovatebot/github-action@v46.1.20
         env:
           RENOVATE_AUTODISCOVER: 'false'
-          RENOVATE_DRY_RUN: 'lookup'
-          LOG_LEVEL: 'debug'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.tentris_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
           RENOVATE_CONFIG_FILE: tentris.json
@@ -84,7 +80,7 @@ jobs:
           GIT_TERMINAL_PROMPT: '0'
         with:
           token: ${{ secrets.RENOVATE_TOKEN_TENTRIS }}
-          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+|LOG_LEVEL)$'
+          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
 
       - name: Prune Dice Group orphaned cache entries
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
