@@ -23,10 +23,12 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/.*\\.ya?ml$/"
+        "/^\\.github/.*\\.ya?ml$/",
+        "/(^|/)Dockerfile$/"
       ],
       "matchStrings": [
-        "conan-version:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+        "conan-version:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?",
+        "conan==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "datasourceTemplate": "pypi",
       "depNameTemplate": "conan"
