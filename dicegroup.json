@@ -15,6 +15,7 @@
   ],
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
+  "automerge": false,
   "enabledManagers": [
     "github-actions",
     "custom.regex",
@@ -52,7 +53,6 @@
       "matchManagers": [
         "github-actions"
       ],
-      "enabled": true,
       "extractVersion": "^(?<version>v\\d+\\.\\d+\\.\\d+)$"
     },
     {
@@ -67,29 +67,14 @@
     },
     {
       "matchDepNames": [
-        "conan"
+        "conan",
+        "Kitware/CMake"
       ],
       "matchUpdateTypes": [
         "minor",
         "patch"
       ],
       "automerge": true
-    },
-    {
-      "matchDepNames": [
-        "Kitware/CMake"
-      ],
-      "reviewers": [
-        "liss-h"
-      ]
-    },
-    {
-      "matchManagers": [
-        "conan"
-      ],
-      "reviewers": [
-        "liss-h"
-      ]
     }
   ]
 }
