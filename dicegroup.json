@@ -82,6 +82,14 @@
       "reviewers": [
         "liss-h"
       ]
+    },
+    {
+      "matchManagers": [
+        "conan"
+      ],
+      "reviewers": [
+        "liss-h"
+      ]
     }
   ]
 }
