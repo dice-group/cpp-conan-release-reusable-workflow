@@ -15,6 +15,8 @@
   ],
   "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
+  "schedule": ["* * * * 0"],
+  "updateNotScheduled": false,
   "automerge": false,
   "enabledManagers": [
     "github-actions",
