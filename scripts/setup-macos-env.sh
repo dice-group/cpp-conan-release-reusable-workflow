@@ -51,8 +51,13 @@ export CXX="${GCC_PREFIX}/bin/g++-${GCC_VERSION}"
 # see https://developer.arm.com/documentation/101754/0624/armclang-Reference/armclang-Command-line-Options/-march
 export CFLAGS="-march=armv8-a+aes+sha2"
 
+# gcc keeps its target libraries in a directory named after the target triple.
+# The triple carries the darwin version gcc was built for, so it changes with
+# every macOS major release (macOS 15 is darwin24, macOS 26 is darwin25).
+GCC_TARGET_TRIPLE="$("${CC}" -dumpmachine)"
+
 # rustc needs to be able to find libgcc.a libgcc_s.dylib and libstdc++.a
-export RUSTFLAGS="-L${GCC_PREFIX}/lib/gcc/${GCC_VERSION} -L${GCC_PREFIX}/lib/gcc/${GCC_VERSION}/gcc/aarch64-apple-darwin24/${GCC_VERSION}"
+export RUSTFLAGS="-L${GCC_PREFIX}/lib/gcc/${GCC_VERSION} -L${GCC_PREFIX}/lib/gcc/${GCC_VERSION}/gcc/${GCC_TARGET_TRIPLE}/${GCC_VERSION}"
 
 # Workaround for issue in aws-lc-sys jitter-entropy component
 # https://github.com/aws/aws-lc-rs/issues/1008
