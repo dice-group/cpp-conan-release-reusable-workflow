@@ -81,9 +81,20 @@
       "automerge": true
     },
     {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "lukka/get-cmake"
+      ],
+      "groupName": "cmake version tracking",
+      "automerge": false
+    },
+    {
       "matchDepNames": [
         "Kitware/CMake"
       ],
+      "groupName": "cmake version tracking",
       "reviewers": [
         "liss-h"
       ]
