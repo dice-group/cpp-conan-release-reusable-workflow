@@ -87,8 +87,7 @@
       "matchDepNames": [
         "lukka/get-cmake"
       ],
-      "groupName": "cmake version tracking",
-      "automerge": false
+      "groupName": "cmake version tracking"
     },
     {
       "matchDepNames": [
