@@ -94,10 +94,7 @@
       "matchDepNames": [
         "Kitware/CMake"
       ],
-      "groupName": "cmake version tracking",
-      "reviewers": [
-        "liss-h"
-      ]
+      "groupName": "cmake version tracking"
     }
   ]
 }
