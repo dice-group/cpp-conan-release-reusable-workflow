@@ -65,7 +65,7 @@
         "rui314/setup-mold",
         "rlalik/setup-cpp-compiler"
       ],
-      "extractVersion": "^v(?<version>\\d+(?:\\.\\d+){0,2})$"
+      "extractVersion": "^(?<version>v\\d+(?:\\.\\d+){0,2})$"
     },
     {
       "matchManagers": [
