@@ -1,4 +1,4 @@
-{
+module.exports = {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
@@ -65,7 +65,7 @@
         "rui314/setup-mold",
         "rlalik/setup-cpp-compiler"
       ],
-      "extractVersion": "^v(?<version>\\d+(?:\\.\\d+){0,2})$"
+      "extractVersion": "^(?<version>v\\d+(?:\\.\\d+){0,2})$"
     },
     {
       "matchManagers": [
@@ -87,6 +87,20 @@
         "patch"
       ],
       "automerge": true
+    },
+    {
+      // Normally follows the file-level Sunday-only schedule above. Set
+      // FORCE_REUSABLE_WORKFLOWS_BUMP=true on the Renovate run to bypass
+      // that and let this one dependency update any day.
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "dice-group/cpp-conan-release-reusable-workflow"
+      ],
+      ...(process.env.FORCE_REUSABLE_WORKFLOWS_BUMP === "true"
+        ? { "schedule": ["at any time"] }
+        : {})
     }
   ]
-}
+};
