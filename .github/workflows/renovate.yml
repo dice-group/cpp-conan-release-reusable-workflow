@@ -2,6 +2,11 @@ name: Renovate
 
 on:
   workflow_dispatch:
+    inputs:
+      force_reusable_workflows_bump:
+        description: 'Bypass the Sunday-only schedule for dice-group/cpp-conan-release-reusable-workflow updates'
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -33,9 +38,9 @@ jobs:
         id: config-fingerprint
         run: |
           echo "dice_repos=$(scripts/renovate-repos.sh DICE_GROUP_REPO)" >> "$GITHUB_OUTPUT"
-          echo "dice_hash=$(scripts/renovate-hash.sh dicegroup.json)" >> "$GITHUB_OUTPUT"
+          echo "dice_hash=$(scripts/renovate-hash.sh dicegroup.js)" >> "$GITHUB_OUTPUT"
           echo "tentris_repos=$(scripts/renovate-repos.sh TENTRIS_REPO)" >> "$GITHUB_OUTPUT"
-          echo "tentris_hash=$(scripts/renovate-hash.sh tentris.json)" >> "$GITHUB_OUTPUT"
+          echo "tentris_hash=$(scripts/renovate-hash.sh tentris.js)" >> "$GITHUB_OUTPUT"
 
       - name: Run Renovate for this repository
         uses: renovatebot/github-action@v46.2.4
@@ -51,7 +56,7 @@ jobs:
           RENOVATE_AUTODISCOVER: 'false'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.dice_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
-          RENOVATE_CONFIG_FILE: dicegroup.json
+          RENOVATE_CONFIG_FILE: dicegroup.js
           RENOVATE_REPOSITORY_CACHE: 'enabled'
           RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/dice-group/${{ steps.config-fingerprint.outputs.dice_hash }}/'
           RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
@@ -60,9 +65,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_PASSWORD }}
           AWS_REGION: 'eu-central-1'
           GIT_TERMINAL_PROMPT: '0'
+          FORCE_REUSABLE_WORKFLOWS_BUMP: ${{ inputs.force_reusable_workflows_bump }}
         with:
           token: ${{ secrets.RENOVATE_TOKEN_DICEGROUP }}
-          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
+          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+|FORCE_\w+)$'
 
       - name: Run Renovate for Tentris Repositories
         uses: renovatebot/github-action@v46.2.4
@@ -70,7 +76,7 @@ jobs:
           RENOVATE_AUTODISCOVER: 'false'
           RENOVATE_REPOSITORIES: ${{ steps.config-fingerprint.outputs.tentris_repos }}
           RENOVATE_BASE_BRANCHES: '["develop"]'
-          RENOVATE_CONFIG_FILE: tentris.json
+          RENOVATE_CONFIG_FILE: tentris.js
           RENOVATE_REPOSITORY_CACHE: 'enabled'
           RENOVATE_REPOSITORY_CACHE_TYPE: 's3://tentris-renovate/cache/tentris/${{ steps.config-fingerprint.outputs.tentris_hash }}/'
           RENOVATE_S3_ENDPOINT: 'https://fsn1.your-objectstorage.com'
@@ -79,9 +85,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_PASSWORD }}
           AWS_REGION: 'eu-central-1'
           GIT_TERMINAL_PROMPT: '0'
+          FORCE_REUSABLE_WORKFLOWS_BUMP: ${{ inputs.force_reusable_workflows_bump }}
         with:
           token: ${{ secrets.RENOVATE_TOKEN_TENTRIS }}
-          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+)$'
+          env-regex: '^(?:RENOVATE_\w+|AWS_\w+|GIT_\w+|FORCE_\w+)$'
 
       - name: Prune Dice Group orphaned cache entries
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
