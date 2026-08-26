@@ -87,13 +87,13 @@
       "matchDepNames": [
         "lukka/get-cmake"
       ],
-      "groupName": "cmake version tracking"
+      "groupName": "cmake-group"
     },
     {
       "matchDepNames": [
         "Kitware/CMake"
       ],
-      "groupName": "cmake version tracking"
+      "groupName": "cmake-group"
     }
   ]
 }
