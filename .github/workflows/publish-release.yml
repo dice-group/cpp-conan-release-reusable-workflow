@@ -1,4 +1,4 @@
-name: Release
+name: Publish Release
 
 on:
   workflow_call:
@@ -15,10 +15,10 @@ on:
         default: clang-17
       cmake-version:
         type: string
-        default: 3.24.0
+        default: 4.4.2
       conan-version:
         type: string
-        default: 2.3.0
+        default: 2.31.2
       conan-options:
         type: string
       use-tag: # if true an existing tag/release is update; otherwise the job fails. If true the job will also fail if the tag doesn't match the version reported via conan.
