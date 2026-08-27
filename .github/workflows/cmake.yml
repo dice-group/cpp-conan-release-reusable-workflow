@@ -1,0 +1,25 @@
+name: CMake alignment check
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/publish-release.yml'
+      - '.github/workflows/publish-conan-branch-package.yml'
+      - '.github/workflows/abi-diff.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-release.yml'
+      - '.github/workflows/publish-conan-branch-package.yml'
+      - '.github/workflows/abi-diff.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Verify lukka/get-cmake pin covers the cmake-version default
+        run: scripts/cmake-check.sh
