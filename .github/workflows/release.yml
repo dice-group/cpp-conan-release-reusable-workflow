@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version component to bump'
+        type: choice
+        required: true
+        options:
+          - major
+          - minor
+          - patch
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
+          fetch-depth: 0
+
+      - name: Compute and push the next release tag
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+
+          latest="$(git tag --list 'r[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n1)"
+          if [ -z "$latest" ]; then
+            echo "::error::No existing r*.*.* tag found to bump from."
+            exit 1
+          fi
+
+          IFS='.' read -r major minor patch <<< "${latest#r}"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+            *) echo "::error::Unknown bump type: $BUMP"; exit 1 ;;
+          esac
+          new="r${major}.${minor}.${patch}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${new}" >/dev/null 2>&1; then
+            echo "::error::Tag ${new} already exists."
+            exit 1
+          fi
+
+          echo "Bumping ${latest} -> ${new} (${BUMP})"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${new}"
+          git push origin "${new}"
