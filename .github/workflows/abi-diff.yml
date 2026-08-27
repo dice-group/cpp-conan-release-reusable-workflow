@@ -13,10 +13,10 @@ on:
         default: clang++-20
       cmake-version:
         type: string
-        default: 3.21.7
+        default: 4.4.2
       conan-version:
         type: string
-        default: 2.23.0
+        default: 2.31.2
       setup_tools:
         type: boolean
         default: false
