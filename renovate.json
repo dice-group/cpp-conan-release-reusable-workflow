@@ -25,7 +25,7 @@
       ],
       "matchStrings": [
         "conan-version:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?",
-        "conan-version:\\s*\\n\\s*type:\\s*string\\s*\\n\\s*default:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+        "conan-version:\\s*\\n[\\s\\S]{0,80}?default:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
       ],
       "datasourceTemplate": "pypi",
       "depNameTemplate": "conan"
@@ -37,7 +37,7 @@
       ],
       "matchStrings": [
         "cmake-version:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?",
-        "cmake-version:\\s*\\n\\s*type:\\s*string\\s*\\n\\s*default:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+        "cmake-version:\\s*\\n[\\s\\S]{0,80}?default:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "Kitware/CMake",
