@@ -16,7 +16,7 @@ on:
         default: 4.4.2
       conan-version:
         type: string
-        default: 2.31.2
+        default: 2.32.0
       setup_tools:
         type: boolean
         default: false

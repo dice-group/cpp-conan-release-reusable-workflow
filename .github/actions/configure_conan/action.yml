@@ -3,7 +3,7 @@ description: "installs conan via pip and creates a default user for it"
 inputs:
   conan-version:
     description: "conan version to install"
-    default: 2.31.2
+    default: 2.32.0
     required: true
 runs:
   using: "composite"
