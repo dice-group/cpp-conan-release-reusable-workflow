@@ -15,7 +15,7 @@ on:
         default: clang-17
       cmake-version:
         type: string
-        default: 4.4.2
+        default: 4.4.3
       conan-version:
         type: string
         default: 2.32.0
