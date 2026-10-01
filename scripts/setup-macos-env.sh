@@ -49,7 +49,12 @@ export CXX="${GCC_PREFIX}/bin/g++-${GCC_VERSION}"
 # aws-lc-sys requires __ARM_FEATURE_AES and __ARM_FEATURE_SHA2
 # which are only enabled when you pass this option
 # see https://developer.arm.com/documentation/101754/0624/armclang-Reference/armclang-Command-line-Options/-march
-export CFLAGS="-march=armv8-a+aes+sha2"
+#
+# armv8.1 is necessary because we are compiling with GCC and that emits GCC internal
+# functions for atomic ops. The functions are defined in libgcc which is not necesarily linked.
+# Bumping to 8.1 ensures that the hardware has atomic instructions and GCC won't need to
+# emit the function calls.
+export CFLAGS="-march=armv8.1-a+aes+sha2"
 
 # gcc keeps its target libraries in a directory named after the target triple.
 # The triple carries the darwin version gcc was built for, so it changes with
