@@ -63,7 +63,3 @@ GCC_TARGET_TRIPLE="$("${CC}" -dumpmachine)"
 
 # rustc needs to be able to find libgcc.a libgcc_s.dylib and libstdc++.a
 export RUSTFLAGS="-L${GCC_PREFIX}/lib/gcc/${GCC_VERSION} -L${GCC_PREFIX}/lib/gcc/${GCC_VERSION}/gcc/${GCC_TARGET_TRIPLE}/${GCC_VERSION}"
-
-# Workaround for issue in aws-lc-sys jitter-entropy component
-# https://github.com/aws/aws-lc-rs/issues/1008
-export AWS_LC_SYS_NO_JITTER_ENTROPY=1
