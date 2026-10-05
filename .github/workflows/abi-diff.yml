@@ -13,7 +13,7 @@ on:
         default: clang++-20
       cmake-version:
         type: string
-        default: 4.4.2
+        default: 4.4.4
       conan-version:
         type: string
         default: 2.33.0
@@ -68,7 +68,7 @@ jobs:
 
       - name: Get minimum cmake version
         if: inputs.setup_tools
-        uses: lukka/get-cmake@v4.4.2
+        uses: lukka/get-cmake@v4.4.4
         with:
           cmakeVersion: ${{ inputs.cmake-version }}
 
