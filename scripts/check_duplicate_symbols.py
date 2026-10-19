@@ -6,7 +6,7 @@ When we link two libraries that each export global symbols with the same name th
 silently use one or the other which can cause errors as whatever function is behind the symbol might be radically different.
 
 We don't report C++ allocation functions, which are often replaced on purpose (by e.g. mimalloc).
-Libraries that are neither in the search dirs of their crate nor in the -L dirs of RUSTFLAGS (system libraries like
+Libraries that are neither in the search dirs of a build script nor in the -L dirs of RUSTFLAGS (system libraries like
 libstdc++ on glibc) and symbols of rust crates themselves, e.g. #[no_mangle] functions, are not checked.
 RUSTFLAGS is read from the environment, so run the script with the RUSTFLAGS of the build.
 """
@@ -61,10 +61,15 @@ def main():
 
     libraries = {}  # (crate, file name) -> path. A crate that is a build dependency too is built twice.
     unchecked = []
+    build_scripts = [m for m in messages if m["reason"] == "build-script-executed"]
+    # rustc also gets the search dirs of the build scripts of all dependencies, we don't know the dependencies so we
+    # search the dirs of all build scripts after the crate's own
+    other_dirs = [Path(path.split("=", 1)[-1]) for m in build_scripts for path in m["linked_paths"]]
     rustflags_dirs = rustflags_search_dirs()
-    for message in (m for m in messages if m["reason"] == "build-script-executed"):
+    for message in build_scripts:
         crate = message["package_id"]
-        search_dirs = [Path(path.split("=", 1)[-1]) for path in message["linked_paths"]] + rustflags_dirs
+        own_dirs = [Path(path.split("=", 1)[-1]) for path in message["linked_paths"]]
+        search_dirs = dict.fromkeys(own_dirs + other_dirs + rustflags_dirs)
         for lib in message["linked_libs"]:
             kind, _, name = lib.rpartition("=")
             if kind.partition(":")[0] not in ("static", ""):  # without a kind, a static lib if one exists
@@ -80,7 +85,7 @@ def main():
     if not archives:
         raise SystemExit("No static libraries found")
     if unchecked:
-        print(f"Not in the search dirs of their crate or RUSTFLAGS, assuming system libraries: {', '.join(sorted(set(unchecked)))}")
+        print(f"Not in the search dirs of a build script or RUSTFLAGS, assuming system libraries: {', '.join(sorted(set(unchecked)))}")
 
     definitions = defaultdict(list)  # symbol -> [(archive, non-weak)]
     for archive in archives:
