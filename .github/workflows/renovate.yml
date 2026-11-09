@@ -27,7 +27,6 @@ env:
   TENTRIS_REPO_4: 'tentris/tentris-storage'
   TENTRIS_REPO_5: 'tentris/tentris-lib'
   TENTRIS_REPO_6: 'tentris/tentris-frontend'
-  TENTRIS_REPO_7: 'tentris/arc-runners-ansible'
 
 jobs:
   renovate:
@@ -56,7 +55,7 @@ jobs:
         env:
           RENOVATE_REPOSITORIES: 'tentris/arc-runners-ansible'
           RENOVATE_BASE_BRANCH_PATTERNS: '["main"]'
-          RENOVATE_CONFIG_FILE: tentris.js
+          RENOVATE_CONFIG_FILE: arcrunners.js
         with:
           token: ${{ secrets.RENOVATE_TOKEN_TENTRIS }}
 
