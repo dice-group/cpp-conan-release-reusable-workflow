@@ -51,6 +51,15 @@ jobs:
         with:
           token: ${{ secrets.RENOVATE_TOKEN_DICEGROUP }}
 
+      - name: Run Renovate for Arc Runners
+        uses: renovatebot/github-action@v46.3.13
+        env:
+          RENOVATE_REPOSITORIES: 'tentris/arc-runners-ansible'
+          RENOVATE_BASE_BRANCH_PATTERNS: '["main"]'
+          RENOVATE_CONFIG_FILE: tentris.js
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN_TENTRIS }}
+
       - name: Run Renovate for Dice Group Repositories
         uses: renovatebot/github-action@v46.3.13
         env:
