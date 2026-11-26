@@ -54,6 +54,30 @@ def rustflags_search_dirs():
     return [Path(path.split("=", 1)[-1]) for path in re.findall(r"(?:^|\s)-L\s*(\S+)", os.environ.get("RUSTFLAGS", ""))]
 
 
+def linked_packages(messages):
+    """The ids of the packages that are linked into the artifacts of the build"""
+    # Nothing depends on the artifact that cargo builds last, so its package is a member of the built workspace.
+    # The features of the build are unknown, with all of them the dependency graph is a superset of the built one.
+    manifest_path = [m for m in messages if m["reason"] == "compiler-artifact"][-1]["manifest_path"]
+    cargo = subprocess.run(["cargo", "metadata", "--format-version=1", "--locked", "--all-features",
+                            "--manifest-path", manifest_path], capture_output=True, text=True)
+    if cargo.returncode != 0:
+        raise SystemExit(f"cargo metadata failed:\n{cargo.stderr}")
+    metadata = json.loads(cargo.stdout)
+    proc_macros = {p["id"] for p in metadata["packages"] if any("proc-macro" in t["kind"] for t in p["targets"])}
+    dependencies = {node["id"]: [dep["pkg"] for dep in node["deps"]
+                                 if any(kind["kind"] != "build" for kind in dep["dep_kinds"])]
+                    for node in metadata["resolve"]["nodes"]}
+
+    linked, todo = set(), list(metadata["workspace_members"])
+    while todo:
+        package = todo.pop()
+        if package not in linked and package not in proc_macros:
+            linked.add(package)
+            todo += dependencies[package]
+    return linked
+
+
 def main():
     messages = [json.loads(line) for line in sys.stdin]
     if not any(m["reason"] == "build-finished" and m["success"] for m in messages):
@@ -61,7 +85,12 @@ def main():
 
     libraries = {}  # (crate, file name) -> path. A crate that is a build dependency too is built twice.
     unchecked = []
-    build_scripts = [m for m in messages if m["reason"] == "build-script-executed"]
+    linked = linked_packages(messages)
+    executed = [m for m in messages if m["reason"] == "build-script-executed"]
+    build_scripts = [m for m in executed if m["package_id"] in linked]
+    host_only = sorted({m["package_id"] for m in executed if m["package_id"] not in linked and m["linked_libs"]})
+    if host_only:
+        print(f"Only linked into build scripts or proc macros, not checked: {', '.join(host_only)}")
     # rustc also gets the search dirs of the build scripts of all dependencies, we don't know the dependencies so we
     # search the dirs of all build scripts after the crate's own
     other_dirs = [Path(path.split("=", 1)[-1]) for m in build_scripts for path in m["linked_paths"]]
